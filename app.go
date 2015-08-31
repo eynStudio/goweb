@@ -7,7 +7,8 @@ import (
 )
 
 type App struct {
-	Server *http.Server
+	Server     *http.Server
+	SetupHooks []func()
 }
 
 func NewApp() *App {
@@ -21,7 +22,18 @@ func NewApp() *App {
 }
 
 func (this *App) Run() {
+	this.runSetupHooks()
 	this.Server.ListenAndServe()
+}
+
+func (this *App) UseHook(f func()) {
+	this.SetupHooks = append(this.SetupHooks, f)
+}
+
+func (this *App) runSetupHooks() {
+	for _, hook := range this.SetupHooks {
+		hook()
+	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {

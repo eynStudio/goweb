@@ -5,6 +5,11 @@ import (
 )
 
 func Run() {
+	app := NewApp()
+	app.UseHook(func() {
+		fmt.Println("I'm a hook")
+	})
 	fmt.Println("I'm Start...")
-	NewApp().Run()
+	app.Run()
+	fmt.Println("I'm Stop")
 }
