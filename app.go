@@ -2,6 +2,7 @@ package goweb
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 )
@@ -37,5 +38,22 @@ func (this *App) runSetupHooks() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi, This is an example of http service in golang!")
+	var (
+		req  = NewRequest(r)
+		resp = NewResponse(w)
+		c    = NewController(req, resp)
+	)
+	Filters[0](c, Filters[1:])
+
+	if c.Result != nil {
+		c.Result.Apply(req, resp)
+	} else if c.Response.Status != 0 {
+		c.Response.Out.WriteHeader(c.Response.Status)
+	} else {
+		fmt.Fprintf(w, "Hi, This is an example of http service in golang!")
+	}
+
+	if w, ok := resp.Out.(io.Closer); ok {
+		w.Close()
+	}
 }
