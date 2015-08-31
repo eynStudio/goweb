@@ -24,3 +24,8 @@ func NewRequest(r *http.Request) *Request {
 		Request: r,
 	}
 }
+
+// Header sets response header item string via given key.
+func (this *Response) Header(key, val string) {
+	this.Out.Header().Set(key, val)
+}
