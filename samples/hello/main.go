@@ -7,7 +7,7 @@ import (
 
 func main() {
 
-	goweb.MyRouter.Route("/api/eyn/{id}")
+	goweb.MyRouter.Route("/api/{ctrl}-{eyn}/{id}")
 	//	goweb.Run()
 }
 
