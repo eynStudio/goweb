@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path"
 	"time"
 )
 
@@ -39,7 +40,13 @@ func (this *App) runSetupHooks() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-
+	url := path.Clean(r.URL.Path)
+	fmt.Println(url)
+	route, params := MyRouter.FindRoute(url)
+	if route == nil {
+		fmt.Println("route not found")
+	}
+	fmt.Println(params)
 	var (
 		req  = NewRequest(r)
 		resp = NewResponse(w)

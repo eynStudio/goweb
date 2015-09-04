@@ -91,19 +91,19 @@ func (this *Route) parse() {
 	fmt.Printf("%#v\n", this)
 }
 
-func (this *Route) Exec(path string) (params map[string]interface{}) {
+func (this *Route) Exec(path string) (bool, map[string]interface{}) {
 	reg := regexp.MustCompile(this.Regexp)
 	if !reg.MatchString(path) {
-		return
+		return false, nil
 	}
 
 	all := reg.FindStringSubmatch(path)[1:]
-	params = make(map[string]interface{}, len(all))
+	params := make(map[string]interface{}, len(all))
 
 	for i, param := range all {
 		params[this.ParamNames[i]] = param
 	}
-	return
+	return true, params
 }
 
 func (this *Router) Route(path string) {
@@ -129,14 +129,17 @@ func (this *Router) Register(controller interface{}) {
 	}
 }
 
-func RouterFilter(c *Controller, fc []Filter) {
-	fmt.Println("RouterFilter")
+func (this *Router) FindRoute(url string) (*Route, map[string]interface{}) {
 	for _, r := range MyRouter.Routes {
-		params := r.Exec(c.Request.URL.Path)
-		if params != nil {
+		match, params := r.Exec(url)
+		if match {
 			fmt.Printf("%#v\n", params)
-			break
+			return &r, params
 		}
 	}
-	fc[0](c, fc[1:])
+	return nil, nil
+}
+func (this *Router) FindController(route *Route, params map[string]interface{}) *Controller {
+
+	return nil
 }
