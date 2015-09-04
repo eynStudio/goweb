@@ -2,6 +2,7 @@ package goweb
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
 	"strings"
 )
@@ -27,7 +28,11 @@ type Route struct {
 
 type Router struct {
 	Routes []Route
-	Ctrls  []interface{}
+	Ctrls  map[string]*ControllerInfo
+}
+
+func init() {
+	MyRouter = Router{Ctrls: make(map[string]*ControllerInfo)}
 }
 
 func NewRoute(path string) (route *Route) {
@@ -62,19 +67,22 @@ func (this *Route) parse() {
 		segment := pattern[last:r[0]]
 		this.Segments = append(this.Segments, segment)
 
-		compiled = compiled + quoteRegExp(segment, "[^/]*", false)
-
 		if r[4] > -1 {
 			this.ParamNames = append(this.ParamNames, pattern[r[4]:r[5]])
 		} else {
 			this.ParamNames = append(this.ParamNames, pattern[r[6]:r[7]])
 		}
+		patt := "[^/]*"
+		if r[8] > -1 {
+			patt = pattern[r[8]:r[9]]
+		}
+		compiled += quoteRegExp(segment, patt, false)
 
 		last = r[1]
 	}
 	segment := pattern[last:]
 
-	compiled = compiled + quoteRegExp(segment, "", false) + "$"
+	compiled += quoteRegExp(segment, "", false) + "$"
 
 	this.Regexp = compiled
 	this.Segments = append(this.Segments, segment)
@@ -83,19 +91,52 @@ func (this *Route) parse() {
 	fmt.Printf("%#v\n", this)
 }
 
-func (this *Route) Exec(path string) {
+func (this *Route) Exec(path string) (params map[string]interface{}) {
 	reg := regexp.MustCompile(this.Regexp)
-	all := reg.FindAllStringSubmatch(path, -1)
-	fmt.Println(all)
+	if !reg.MatchString(path) {
+		return
+	}
+
+	all := reg.FindStringSubmatch(path)[1:]
+	params = make(map[string]interface{}, len(all))
+
+	for i, param := range all {
+		params[this.ParamNames[i]] = param
+	}
+	return
 }
 
 func (this *Router) Route(path string) {
 	r := NewRoute(path)
 	r.Exec("/api/abc-xyz/123")
+	r.Exec("/api/abc-xyz/opq")
 
 	this.Routes = append(this.Routes, *r)
 }
 
-func (this *Router) Register(controller *Controller) {
-	this.Ctrls = append(this.Ctrls, controller)
+func (this *Router) Register(controller interface{}) {
+	c := reflect.TypeOf(controller)
+	fmt.Println(c)
+	name := strings.ToLower(c.Elem().Name())
+
+	ctrl := &ControllerInfo{name, c.Elem(), nil}
+	this.Ctrls[name] = ctrl
+
+	for i, j := 0, c.NumMethod(); i < j; i++ {
+		m := c.Method(i)
+		cm := &ControllerMethod{strings.ToLower(m.Name), nil}
+		ctrl.Methods = append(ctrl.Methods, cm)
+	}
+}
+
+func RouterFilter(c *Controller, fc []Filter) {
+	fmt.Println("RouterFilter")
+	for _, r := range MyRouter.Routes {
+		params := r.Exec(c.Request.URL.Path)
+		if params != nil {
+			fmt.Printf("%#v\n", params)
+			break
+		}
+	}
+	fc[0](c, fc[1:])
 }
