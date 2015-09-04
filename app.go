@@ -24,6 +24,7 @@ func NewApp() *App {
 
 func (this *App) Run() {
 	this.runSetupHooks()
+
 	this.Server.ListenAndServe()
 }
 
@@ -38,6 +39,7 @@ func (this *App) runSetupHooks() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+
 	var (
 		req  = NewRequest(r)
 		resp = NewResponse(w)
