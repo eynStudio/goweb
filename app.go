@@ -8,28 +8,48 @@ import (
 )
 
 type App struct {
+	Name       string
+	Config     *Config
 	Server     *http.Server
 	SetupHooks []func()
 }
 
-func NewApp() *App {
-	app := &App{Server: &http.Server{
-		Addr:         ":80",
-		Handler:      http.HandlerFunc(handler),
-		ReadTimeout:  time.Minute,
-		WriteTimeout: time.Minute,
-	}}
+func NewApp(name string) *App {
+	app := &App{}
+	app.Init(name)
 	return app
 }
 
-func (this *App) Run() {
+func (this *App) Init(name string) *App {
+	this.Name = name
+	this.Config = LoadConfig(name)
+
+	this.Server = &http.Server{
+		Addr:         fmt.Sprintf(":%d", this.Config.Port),
+		Handler:      http.HandlerFunc(handler),
+		ReadTimeout:  time.Minute,
+		WriteTimeout: time.Minute,
+	}
+	return this
+}
+func (this *App) Start() {
 	this.runSetupHooks()
 
-	this.Server.ListenAndServe()
+	if this.Config.Tls {
+		err := this.Server.ListenAndServeTLS(this.Config.CertFile, this.Config.KeyFile)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		err := this.Server.ListenAndServe()
+		if err != nil {
+			panic(err)
+		}
+	}
 }
-
-func (this *App) UseHook(f func()) {
+func (this *App) UseHook(f func()) *App {
 	this.SetupHooks = append(this.SetupHooks, f)
+	return this
 }
 
 func (this *App) runSetupHooks() {
