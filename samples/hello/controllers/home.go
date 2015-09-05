@@ -9,8 +9,7 @@ type Home struct {
 }
 
 func (this *Home) Get() Result {
-	data := struct{ Name string }{"EYN"}
-	return JsonResult{data}
+	return TemplateResult{"index", "GoWeb"}
 }
 
 func (this *Home) GetXyz() Result {

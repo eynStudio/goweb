@@ -17,6 +17,16 @@ func (this ErrorResult) Apply(ctx *HttpContext) {
 	ctx.Resp.Write([]byte(this.Error.Error()))
 }
 
+type TemplateResult struct {
+	Tpl  string
+	Data interface{}
+}
+
+func (this TemplateResult) Apply(ctx *HttpContext) {
+	ctx.Header("Content-Type", "text/html; charset=utf-8")
+	MyTemplates.Execute(ctx.Resp, this.Tpl, this.Data)
+}
+
 type HtmlResult struct {
 	Html string
 }

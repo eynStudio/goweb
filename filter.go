@@ -12,6 +12,7 @@ var Filters = []Filter{
 	StaticFilter,
 	RouterFilter,
 	ControllerFilter,
+	func(*HttpContext, []Filter) {},
 }
 
 func StaticFilter(ctx *HttpContext, fc []Filter) {
