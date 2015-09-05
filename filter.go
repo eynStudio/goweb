@@ -1,23 +1,24 @@
 package goweb
 
 import (
-	"fmt"
+	"net/http"
+	"path"
+	"strings"
 )
 
 type Filter func(ctx *HttpContext, filterChain []Filter)
 
 var Filters = []Filter{
-	testFilter,
 	StaticFilter,
 	RouterFilter,
 	ControllerFilter,
-	testFilter2}
-
-func testFilter(ctx *HttpContext, fc []Filter) {
-	fmt.Println("just test")
-	fc[0](ctx, fc[1:])
 }
 
-func testFilter2(ctx *HttpContext, fc []Filter) {
-	fmt.Println("just test 2")
+func StaticFilter(ctx *HttpContext, fc []Filter) {
+	url := path.Clean(ctx.Req.URL.Path)
+	if strings.HasPrefix(url, "/static") {
+		http.ServeFile(ctx.Resp, ctx.Req, url[1:])
+	} else {
+		fc[0](ctx, fc[1:])
+	}
 }
