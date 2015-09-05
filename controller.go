@@ -5,11 +5,8 @@ import (
 )
 
 type Controller struct {
-	AppController interface{}
-
-	Request  *Request
-	Response *Response
-	Result   Result
+	Ctx    *HttpContext
+	Result Result
 }
 
 type ControllerInfo struct {
@@ -26,11 +23,8 @@ type ControllerMethodArg struct {
 	Type reflect.Type
 }
 
-func NewController(req *Request, resp *Response) *Controller {
-	return &Controller{
-		Request:  req,
-		Response: resp,
-	}
+func NewController(ctx *HttpContext) *Controller {
+	return &Controller{Ctx: ctx}
 }
 
 func (c *Controller) Html(html string) Result {

@@ -40,29 +40,32 @@ func (this *App) runSetupHooks() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	var (
+		ctx = NewHttpContext(r, w)
+	)
+	Filters[0](ctx, Filters[1:])
+
 	url := path.Clean(r.URL.Path)
 	fmt.Println(url)
 	route, params := MyRouter.FindRoute(url)
 	if route == nil {
 		fmt.Println("route not found")
-	}
-	fmt.Println(params)
-	var (
-		req  = NewRequest(r)
-		resp = NewResponse(w)
-		c    = NewController(req, resp)
-	)
-	Filters[0](c, Filters[1:])
+	} else {
+		ctrl := MyRouter.FindController(route, params)
 
-	if c.Result != nil {
-		c.Result.Apply(req, resp)
-	} else if c.Response.Status != 0 {
-		c.Response.Out.WriteHeader(c.Response.Status)
+		ctx.Result = ctrl.MethodByName("Get").Call(nil)[0].Interface().(Result)
+		fmt.Println(ctx.Result)
+		fmt.Println(ctrl.Elem())
+
+	}
+
+	if ctx.Result != nil {
+		ctx.Result.Apply(ctx)
 	} else {
 		fmt.Fprintf(w, "Hi, This is an example of http service in golang!")
 	}
 
-	if w, ok := resp.Out.(io.Closer); ok {
+	if w, ok := ctx.Resp.(io.Closer); ok {
 		w.Close()
 	}
 }

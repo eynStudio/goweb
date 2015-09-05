@@ -139,7 +139,9 @@ func (this *Router) FindRoute(url string) (*Route, map[string]interface{}) {
 	}
 	return nil, nil
 }
-func (this *Router) FindController(route *Route, params map[string]interface{}) *Controller {
+func (this *Router) FindController(route *Route, params map[string]interface{}) reflect.Value {
+	ctrl := params["ctrl"].(string)
+	ctrlInfo := this.Ctrls[ctrl]
+	return reflect.New(ctrlInfo.Type)
 
-	return nil
 }

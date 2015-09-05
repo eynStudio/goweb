@@ -4,16 +4,15 @@ import (
 	"fmt"
 )
 
-type Filter func(c *Controller, filterChain []Filter)
+type Filter func(ctx *HttpContext, filterChain []Filter)
 
 var Filters = []Filter{testFilter, testFilter2}
 
-func testFilter(c *Controller, fc []Filter) {
+func testFilter(ctx *HttpContext, fc []Filter) {
 	fmt.Println("just test")
-	fc[0](c, fc[1:])
+	fc[0](ctx, fc[1:])
 }
 
-func testFilter2(c *Controller, fc []Filter) {
+func testFilter2(ctx *HttpContext, fc []Filter) {
 	fmt.Println("just test 2")
-
 }
