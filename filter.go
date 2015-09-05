@@ -8,6 +8,7 @@ type Filter func(ctx *HttpContext, filterChain []Filter)
 
 var Filters = []Filter{
 	testFilter,
+	StaticFilter,
 	RouterFilter,
 	ControllerFilter,
 	testFilter2}

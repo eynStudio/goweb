@@ -2,6 +2,8 @@ package goweb
 
 import (
 	"net/http"
+	"path"
+	"strings"
 )
 
 type HttpContext struct {
@@ -20,4 +22,13 @@ func NewHttpContext(r *http.Request, rw http.ResponseWriter) (ctx *HttpContext) 
 
 func (this *HttpContext) Header(key, val string) {
 	this.Resp.Header().Set(key, val)
+}
+
+func StaticFilter(ctx *HttpContext, fc []Filter) {
+	url := path.Clean(ctx.Req.URL.Path)
+	if strings.HasPrefix(url, "/static") {
+		http.ServeFile(ctx.Resp, ctx.Req, url[1:])
+	} else {
+		fc[0](ctx, fc[1:])
+	}
 }
