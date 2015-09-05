@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"path"
 	"time"
 )
 
@@ -44,20 +43,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		ctx = NewHttpContext(r, w)
 	)
 	Filters[0](ctx, Filters[1:])
-
-	url := path.Clean(r.URL.Path)
-	fmt.Println(url)
-	route, params := MyRouter.FindRoute(url)
-	if route == nil {
-		fmt.Println("route not found")
-	} else {
-		ctrl := MyRouter.FindController(route, params)
-
-		ctx.Result = ctrl.MethodByName("Get").Call(nil)[0].Interface().(Result)
-		fmt.Println(ctx.Result)
-		fmt.Println(ctrl.Elem())
-
-	}
 
 	if ctx.Result != nil {
 		ctx.Result.Apply(ctx)

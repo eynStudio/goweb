@@ -2,6 +2,7 @@ package goweb
 
 import (
 	"fmt"
+	"path"
 	"reflect"
 	"regexp"
 	"strings"
@@ -144,4 +145,23 @@ func (this *Router) FindController(route *Route, params map[string]interface{}) 
 	ctrlInfo := this.Ctrls[ctrl]
 	return reflect.New(ctrlInfo.Type)
 
+}
+
+func RouterFilter(ctx *HttpContext, fc []Filter) {
+
+	url := path.Clean(ctx.Req.URL.Path)
+	fmt.Println(url)
+	route, params := MyRouter.FindRoute(url)
+	ctx.Params = params
+
+	if route == nil {
+		ctx.Result = &JsonResult{"route not found"}
+	} else {
+		ctrl := MyRouter.FindController(route, params)
+		ctx.Result = ctrl.MethodByName("Get").Call(nil)[0].Interface().(Result)
+		fmt.Println(ctx.Result)
+		fmt.Println(ctrl.Elem())
+	}
+
+	fc[0](ctx, fc[1:])
 }

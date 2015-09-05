@@ -6,7 +6,7 @@ import (
 
 type Filter func(ctx *HttpContext, filterChain []Filter)
 
-var Filters = []Filter{testFilter, testFilter2}
+var Filters = []Filter{testFilter, RouterFilter, testFilter2}
 
 func testFilter(ctx *HttpContext, fc []Filter) {
 	fmt.Println("just test")
