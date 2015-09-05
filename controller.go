@@ -12,7 +12,7 @@ type Controller struct {
 type ControllerInfo struct {
 	Name    string
 	Type    reflect.Type
-	Methods []*ControllerMethod
+	Methods map[string]ControllerMethod
 }
 type ControllerMethod struct {
 	Name string
@@ -27,6 +27,13 @@ func NewController(ctx *HttpContext) *Controller {
 	return &Controller{Ctx: ctx}
 }
 
+func NewControllerInfo(name string, t reflect.Type) *ControllerInfo {
+	return &ControllerInfo{
+		Name:    name,
+		Type:    t,
+		Methods: make(map[string]ControllerMethod),
+	}
+}
 func (c *Controller) Html(html string) Result {
 	return &HtmlResult{html}
 }

@@ -92,14 +92,14 @@ func (this *Route) parse() {
 	fmt.Printf("%#v\n", this)
 }
 
-func (this *Route) Exec(path string) (bool, map[string]interface{}) {
+func (this *Route) Exec(path string) (bool, map[string]string) {
 	reg := regexp.MustCompile(this.Regexp)
 	if !reg.MatchString(path) {
 		return false, nil
 	}
 
 	all := reg.FindStringSubmatch(path)[1:]
-	params := make(map[string]interface{}, len(all))
+	params := make(map[string]string, len(all))
 
 	for i, param := range all {
 		params[this.ParamNames[i]] = param
@@ -120,17 +120,16 @@ func (this *Router) Register(controller interface{}) {
 	fmt.Println(c)
 	name := strings.ToLower(c.Elem().Name())
 
-	ctrl := &ControllerInfo{name, c.Elem(), nil}
+	ctrl := NewControllerInfo(name, c.Elem())
 	this.Ctrls[name] = ctrl
 
 	for i, j := 0, c.NumMethod(); i < j; i++ {
 		m := c.Method(i)
-		cm := &ControllerMethod{strings.ToLower(m.Name), nil}
-		ctrl.Methods = append(ctrl.Methods, cm)
+		ctrl.Methods[strings.ToLower(m.Name)] = ControllerMethod{m.Name, nil}
 	}
 }
 
-func (this *Router) FindRoute(url string) (*Route, map[string]interface{}) {
+func (this *Router) FindRoute(url string) (*Route, map[string]string) {
 	for _, r := range MyRouter.Routes {
 		match, params := r.Exec(url)
 		if match {
@@ -140,28 +139,38 @@ func (this *Router) FindRoute(url string) (*Route, map[string]interface{}) {
 	}
 	return nil, nil
 }
-func (this *Router) FindController(route *Route, params map[string]interface{}) reflect.Value {
-	ctrl := params["ctrl"].(string)
+func (this *Router) FindController(route *Route, params map[string]string) *ControllerInfo {
+	ctrl := params["ctrl"]
 	ctrlInfo := this.Ctrls[ctrl]
-	return reflect.New(ctrlInfo.Type)
-
+	return ctrlInfo
 }
 
 func RouterFilter(ctx *HttpContext, fc []Filter) {
-
 	url := path.Clean(ctx.Req.URL.Path)
 	fmt.Println(url)
-	route, params := MyRouter.FindRoute(url)
-	ctx.Params = params
-
-	if route == nil {
+	ctx.Route, ctx.Params = MyRouter.FindRoute(url)
+	if ctx.Route == nil {
 		ctx.Result = &JsonResult{"route not found"}
 	} else {
-		ctrl := MyRouter.FindController(route, params)
-		ctx.Result = ctrl.MethodByName("Get").Call(nil)[0].Interface().(Result)
+		fc[0](ctx, fc[1:])
+	}
+}
+
+func ControllerFilter(ctx *HttpContext, fc []Filter) {
+	ctrlInfo := MyRouter.FindController(ctx.Route, ctx.Params)
+	execController(ctrlInfo, ctx)
+	fc[0](ctx, fc[1:])
+}
+
+func execController(ctrlInfo *ControllerInfo, ctx *HttpContext) {
+	ctrl := reflect.New(ctrlInfo.Type)
+	method := strings.ToLower(ctx.Req.Method)
+	if action, ok := ctx.Params["action"]; ok {
+		method += action
+	}
+	if m, ok := ctrlInfo.Methods[method]; ok {
+		ctx.Result = ctrl.MethodByName(m.Name).Call(nil)[0].Interface().(Result)
 		fmt.Println(ctx.Result)
 		fmt.Println(ctrl.Elem())
 	}
-
-	fc[0](ctx, fc[1:])
 }
