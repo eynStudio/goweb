@@ -12,6 +12,7 @@ type App struct {
 	Config     *Config
 	Server     *http.Server
 	SetupHooks []func()
+	Router     *Router
 }
 
 func NewApp(name string) *App {
@@ -23,10 +24,11 @@ func NewApp(name string) *App {
 func (this *App) Init(name string) *App {
 	this.Name = name
 	this.Config = LoadConfig(name)
+	this.Router = NewRouter()
 
 	this.Server = &http.Server{
 		Addr:         fmt.Sprintf(":%d", this.Config.Port),
-		Handler:      http.HandlerFunc(handler),
+		Handler:      http.HandlerFunc(this.handler),
 		ReadTimeout:  time.Minute,
 		WriteTimeout: time.Minute,
 	}
@@ -58,10 +60,11 @@ func (this *App) runSetupHooks() {
 	}
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func (this *App) handler(w http.ResponseWriter, r *http.Request) {
 	var (
 		ctx = NewHttpContext(r, w)
 	)
+	ctx.App = this
 	Filters[0](ctx, Filters[1:])
 
 	if ctx.Result != nil {

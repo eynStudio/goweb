@@ -7,6 +7,7 @@ import (
 type HttpContext struct {
 	Req    *http.Request
 	Resp   http.ResponseWriter
+	App    *App
 	Route  *Route
 	Params map[string]string
 	Result Result

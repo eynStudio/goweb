@@ -14,8 +14,6 @@ const (
 	Any
 )
 
-var MyRouter Router
-
 type Route struct {
 	Source       string
 	SourcePath   string
@@ -32,8 +30,8 @@ type Router struct {
 	Ctrls  map[string]*ControllerInfo
 }
 
-func init() {
-	MyRouter = Router{Ctrls: make(map[string]*ControllerInfo)}
+func NewRouter() (router *Router) {
+	return &Router{Ctrls: make(map[string]*ControllerInfo)}
 }
 
 func NewRoute(path string) (route *Route) {
@@ -130,7 +128,7 @@ func (this *Router) Register(controller interface{}) {
 }
 
 func (this *Router) FindRoute(url string) (*Route, map[string]string) {
-	for _, r := range MyRouter.Routes {
+	for _, r := range this.Routes {
 		match, params := r.Exec(url)
 		if match {
 			fmt.Printf("%#v\n", params)
@@ -148,7 +146,7 @@ func (this *Router) FindController(route *Route, params map[string]string) *Cont
 func RouterFilter(ctx *HttpContext, fc []Filter) {
 	url := path.Clean(ctx.Req.URL.Path)
 	fmt.Println(url)
-	ctx.Route, ctx.Params = MyRouter.FindRoute(url)
+	ctx.Route, ctx.Params = ctx.App.Router.FindRoute(url)
 	if ctx.Route == nil {
 		ctx.Result = &JsonResult{"route not found"}
 	} else {
@@ -157,7 +155,7 @@ func RouterFilter(ctx *HttpContext, fc []Filter) {
 }
 
 func ControllerFilter(ctx *HttpContext, fc []Filter) {
-	ctrlInfo := MyRouter.FindController(ctx.Route, ctx.Params)
+	ctrlInfo := ctx.App.Router.FindController(ctx.Route, ctx.Params)
 	execController(ctrlInfo, ctx)
 	fc[0](ctx, fc[1:])
 }

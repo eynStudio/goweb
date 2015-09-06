@@ -8,10 +8,13 @@ import (
 
 func main() {
 
-	goweb.MyRouter.Route("/api/{ctrl}/{id:[0-9]+}")
-	goweb.MyRouter.Register((*controllers.Home)(nil))
+	app := goweb.NewApp("conf").UseHook(func() {
+		fmt.Println("I'm a hook")
+	})
+	app.Router.Route("/api/{ctrl}/{id:[0-9]+}")
+	app.Router.Register((*controllers.Home)(nil))
+	app.Start()
 
-	goweb.Run()
 }
 
 func Perror(err error) {
