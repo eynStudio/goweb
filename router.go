@@ -163,12 +163,25 @@ func ControllerFilter(ctx *HttpContext, fc []Filter) {
 func execController(ctrlInfo *ControllerInfo, ctx *HttpContext) {
 	ctrl := reflect.New(ctrlInfo.Type)
 	method := strings.ToLower(ctx.Req.Method)
+	var act ControllerMethod
 	if action, ok := ctx.Params["action"]; ok {
-		method += action
+		if m, ok := ctrlInfo.Methods[method+action]; ok {
+			act = m
+		}
+	} else if _, ok := ctx.Params["id"]; ok {
+		if m, ok := ctrlInfo.Methods[method+"id"]; ok {
+			act = m
+		}
+	} else if m, ok := ctrlInfo.Methods[method]; ok {
+		act = m
 	}
-	if m, ok := ctrlInfo.Methods[method]; ok {
-		ctx.Result = ctrl.MethodByName(m.Name).Call(nil)[0].Interface().(Result)
+
+	if act.Name != "" {
+		fmt.Println(act.Name)
+		ctx.Result = ctrl.MethodByName(act.Name).Call(nil)[0].Interface().(Result)
 		fmt.Println(ctx.Result)
 		fmt.Println(ctrl.Elem())
+	} else {
+		fmt.Println("No Action!")
 	}
 }
