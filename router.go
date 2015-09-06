@@ -2,7 +2,7 @@ package goweb
 
 import (
 	"fmt"
-	"path"
+	//	"path"
 	"reflect"
 	"regexp"
 	"strings"
@@ -47,14 +47,14 @@ func (this *Route) parse() {
 
 	pattern := this.Source
 	quoteRegExp := func(seg string, pattern string, optional bool) (result string) {
-		surroundPattern := []string{"(", ")"}
+		surroundPattern := []string{"(", ")?"}
 		result = strings.Replace(seg, `[\\\[\]\^$*+?.()|{}]`, "\\$&", -1)
 		if len(pattern) == 0 {
 			return
 		}
-		if optional {
-			surroundPattern = []string{"(", ")?"}
-		}
+		//		if optional {
+		//			surroundPattern = []string{"(", ")?"}
+		//		}
 		return result + surroundPattern[0] + pattern + surroundPattern[1]
 	}
 	last := 0
@@ -144,7 +144,7 @@ func (this *Router) FindController(route *Route, params map[string]string) *Cont
 }
 
 func RouterFilter(ctx *HttpContext, fc []Filter) {
-	url := path.Clean(ctx.Req.URL.Path)
+	url := ctx.Req.URL.Path
 	fmt.Println(url)
 	ctx.Route, ctx.Params = ctx.App.Router.FindRoute(url)
 	if ctx.Route == nil {
@@ -168,7 +168,7 @@ func execController(ctrlInfo *ControllerInfo, ctx *HttpContext) {
 		if m, ok := ctrlInfo.Methods[method+action]; ok {
 			act = m
 		}
-	} else if _, ok := ctx.Params["id"]; ok {
+	} else if id, ok := ctx.Params["id"]; ok && id != "" {
 		if m, ok := ctrlInfo.Methods[method+"id"]; ok {
 			act = m
 		}
