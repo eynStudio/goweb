@@ -162,6 +162,7 @@ func ControllerFilter(ctx *HttpContext, fc []Filter) {
 
 func execController(ctrlInfo *ControllerInfo, ctx *HttpContext) {
 	ctrl := reflect.New(ctrlInfo.Type)
+	ctrl.Interface().(Controller).SetCtx(ctx)
 	method := strings.ToLower(ctx.Req.Method)
 	var act ControllerMethod
 	if action, ok := ctx.Params["action"]; ok {

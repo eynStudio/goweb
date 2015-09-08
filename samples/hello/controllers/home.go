@@ -5,7 +5,7 @@ import (
 )
 
 type Home struct {
-	Controller
+	BaseController
 }
 
 func (this *Home) Get() Result {

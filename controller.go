@@ -4,9 +4,12 @@ import (
 	"reflect"
 )
 
-type Controller struct {
-	Ctx    *HttpContext
-	Result Result
+type Controller interface {
+	SetCtx(ctx *HttpContext)
+}
+
+type BaseController struct {
+	Ctx *HttpContext
 }
 
 type ControllerInfo struct {
@@ -23,10 +26,6 @@ type ControllerMethodArg struct {
 	Type reflect.Type
 }
 
-func NewController(ctx *HttpContext) *Controller {
-	return &Controller{Ctx: ctx}
-}
-
 func NewControllerInfo(name string, t reflect.Type) *ControllerInfo {
 	return &ControllerInfo{
 		Name:    name,
@@ -34,10 +33,15 @@ func NewControllerInfo(name string, t reflect.Type) *ControllerInfo {
 		Methods: make(map[string]ControllerMethod),
 	}
 }
-func (c *Controller) Html(html string) Result {
+
+func (this *BaseController) SetCtx(ctx *HttpContext) {
+	this.Ctx = ctx
+}
+
+func (this *BaseController) Html(html string) Result {
 	return &HtmlResult{html}
 }
 
-func (c *Controller) Json(o interface{}) Result {
+func (this *BaseController) Json(o interface{}) Result {
 	return &JsonResult{o}
 }
