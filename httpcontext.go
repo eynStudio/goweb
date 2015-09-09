@@ -1,10 +1,16 @@
 package goweb
 
 import (
+	"github.com/eynStudio/gobreak/di"
 	"net/http"
 )
 
-type HttpContext struct {
+type Context interface {
+	di.Container
+	Next()
+}
+type context struct {
+	di.Container
 	Req    *http.Request
 	Resp   http.ResponseWriter
 	App    *App
@@ -13,12 +19,8 @@ type HttpContext struct {
 	Result Result
 }
 
-func NewHttpContext(r *http.Request, rw http.ResponseWriter) (ctx *HttpContext) {
-	ctx = &HttpContext{Req: r, Resp: rw, Params: make(map[string]string)}
-
-	return
-}
-
-func (this *HttpContext) Header(key, val string) {
+func (this *context) Header(key, val string) {
 	this.Resp.Header().Set(key, val)
 }
+
+func (this *context) Next() {}

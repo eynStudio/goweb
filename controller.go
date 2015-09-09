@@ -5,11 +5,11 @@ import (
 )
 
 type Controller interface {
-	SetCtx(ctx *HttpContext)
+	SetCtx(ctx *context)
 }
 
 type BaseController struct {
-	Ctx *HttpContext
+	Ctx *context `di`
 }
 
 type ControllerInfo struct {
@@ -34,7 +34,7 @@ func NewControllerInfo(name string, t reflect.Type) *ControllerInfo {
 	}
 }
 
-func (this *BaseController) SetCtx(ctx *HttpContext) {
+func (this *BaseController) SetCtx(ctx *context) {
 	this.Ctx = ctx
 }
 

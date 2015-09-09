@@ -2,38 +2,36 @@ package goweb
 
 import (
 	"fmt"
+	"github.com/eynStudio/gobreak/di"
 	"io"
 	"net/http"
 	"time"
 )
 
 type App struct {
+	di.Container
 	Name       string
 	Config     *Config
 	Server     *http.Server
 	SetupHooks []func()
-	Router     *Router
+	Router
 }
 
 func NewApp(name string) *App {
-	app := &App{}
-	app.Init(name)
-	return app
-}
-
-func (this *App) Init(name string) *App {
-	this.Name = name
-	this.Config = LoadConfig(name)
-	this.Router = NewRouter()
-
-	this.Server = &http.Server{
-		Addr:         fmt.Sprintf(":%d", this.Config.Port),
-		Handler:      http.HandlerFunc(this.handler),
+	r := NewRouter()
+	di.Root.MapAs(r, (*Router)(nil))
+	c := LoadConfig(name)
+	app := &App{di.Root, name, c, nil, nil, r}
+	app.Server = &http.Server{
+		Addr:         fmt.Sprintf(":%d", c.Port),
+		Handler:      http.HandlerFunc(app.handler),
 		ReadTimeout:  time.Minute,
 		WriteTimeout: time.Minute,
 	}
-	return this
+
+	return app
 }
+
 func (this *App) Start() {
 	this.runSetupHooks()
 
@@ -59,11 +57,13 @@ func (this *App) runSetupHooks() {
 		hook()
 	}
 }
-
+func (this *App) NewContext(r *http.Request, rw http.ResponseWriter) *context {
+	c := &context{di.New(), r, rw, nil, nil, make(map[string]string), nil}
+	c.SetParent(this)
+	return c
+}
 func (this *App) handler(w http.ResponseWriter, r *http.Request) {
-	var (
-		ctx = NewHttpContext(r, w)
-	)
+	ctx := this.NewContext(r, w)
 	ctx.App = this
 	Filters[0](ctx, Filters[1:])
 

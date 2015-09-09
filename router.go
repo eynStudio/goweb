@@ -2,7 +2,6 @@ package goweb
 
 import (
 	"fmt"
-	//	"path"
 	"reflect"
 	"regexp"
 	"strings"
@@ -25,13 +24,19 @@ type Route struct {
 	ParamNames   []string
 }
 
-type Router struct {
+type Router interface {
+	Register(controller interface{})
+	Route(path string)
+	FindRoute(url string) (*Route, map[string]string)
+	FindController(route *Route, params map[string]string) *ControllerInfo
+}
+type router struct {
 	Routes []Route
 	Ctrls  map[string]*ControllerInfo
 }
 
-func NewRouter() (router *Router) {
-	return &Router{Ctrls: make(map[string]*ControllerInfo)}
+func NewRouter() Router {
+	return &router{Ctrls: make(map[string]*ControllerInfo)}
 }
 
 func NewRoute(path string) (route *Route) {
@@ -105,7 +110,7 @@ func (this *Route) Exec(path string) (bool, map[string]string) {
 	return true, params
 }
 
-func (this *Router) Route(path string) {
+func (this *router) Route(path string) {
 	r := NewRoute(path)
 	r.Exec("/api/abc-xyz/123")
 	r.Exec("/api/abc-xyz/opq")
@@ -113,7 +118,7 @@ func (this *Router) Route(path string) {
 	this.Routes = append(this.Routes, *r)
 }
 
-func (this *Router) Register(controller interface{}) {
+func (this *router) Register(controller interface{}) {
 	c := reflect.TypeOf(controller)
 	fmt.Println(c)
 	name := strings.ToLower(c.Elem().Name())
@@ -127,7 +132,7 @@ func (this *Router) Register(controller interface{}) {
 	}
 }
 
-func (this *Router) FindRoute(url string) (*Route, map[string]string) {
+func (this *router) FindRoute(url string) (*Route, map[string]string) {
 	for _, r := range this.Routes {
 		match, params := r.Exec(url)
 		if match {
@@ -137,15 +142,16 @@ func (this *Router) FindRoute(url string) (*Route, map[string]string) {
 	}
 	return nil, nil
 }
-func (this *Router) FindController(route *Route, params map[string]string) *ControllerInfo {
+func (this *router) FindController(route *Route, params map[string]string) *ControllerInfo {
 	ctrl := params["ctrl"]
 	ctrlInfo := this.Ctrls[ctrl]
 	return ctrlInfo
 }
 
-func RouterFilter(ctx *HttpContext, fc []Filter) {
+func RouterFilter(ctx *context, fc []Filter) {
 	url := ctx.Req.URL.Path
 	fmt.Println(url)
+
 	ctx.Route, ctx.Params = ctx.App.Router.FindRoute(url)
 	if ctx.Route == nil {
 		ctx.Result = &JsonResult{"route not found"}
@@ -154,13 +160,13 @@ func RouterFilter(ctx *HttpContext, fc []Filter) {
 	}
 }
 
-func ControllerFilter(ctx *HttpContext, fc []Filter) {
+func ControllerFilter(ctx *context, fc []Filter) {
 	ctrlInfo := ctx.App.Router.FindController(ctx.Route, ctx.Params)
 	execController(ctrlInfo, ctx)
 	fc[0](ctx, fc[1:])
 }
 
-func execController(ctrlInfo *ControllerInfo, ctx *HttpContext) {
+func execController(ctrlInfo *ControllerInfo, ctx *context) {
 	ctrl := reflect.New(ctrlInfo.Type)
 	ctrl.Interface().(Controller).SetCtx(ctx)
 	method := strings.ToLower(ctx.Req.Method)

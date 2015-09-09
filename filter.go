@@ -6,16 +6,16 @@ import (
 	"strings"
 )
 
-type Filter func(ctx *HttpContext, filterChain []Filter)
+type Filter func(ctx *context, filterChain []Filter)
 
 var Filters = []Filter{
 	StaticFilter,
 	RouterFilter,
 	ControllerFilter,
-	func(*HttpContext, []Filter) {},
+	func(*context, []Filter) {},
 }
 
-func StaticFilter(ctx *HttpContext, fc []Filter) {
+func StaticFilter(ctx *context, fc []Filter) {
 	url := path.Clean(ctx.Req.URL.Path)
 	if strings.HasPrefix(url, "/static") {
 		http.ServeFile(ctx.Resp, ctx.Req, url[1:])
