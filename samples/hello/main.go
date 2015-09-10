@@ -13,7 +13,6 @@ func main() {
 	})
 	app.Use(goweb.StaticHandler)
 	app.Use(goweb.RouterHandler)
-	app.Use(goweb.ControllerHandler)
 	app.Router.Route("/api/{ctrl}/{id:[0-9]+}")
 	app.Router.Register((*controllers.Home)(nil))
 	app.Start()
