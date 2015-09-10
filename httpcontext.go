@@ -1,7 +1,7 @@
 package goweb
 
 import (
-	"github.com/eynStudio/gobreak/di"
+	"github.com/eynstudio/gobreak/di"
 	"net/http"
 )
 

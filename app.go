@@ -2,7 +2,7 @@ package goweb
 
 import (
 	"fmt"
-	"github.com/eynStudio/gobreak/di"
+	"github.com/eynstudio/gobreak/di"
 	"io"
 	"net/http"
 	"time"
