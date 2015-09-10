@@ -7,7 +7,7 @@ import (
 
 type Context interface {
 	di.Container
-	Next()
+	ServeFile(path string)
 }
 type context struct {
 	di.Container
@@ -24,8 +24,9 @@ func (this *context) Header(key, val string) {
 	this.Resp.Header().Set(key, val)
 }
 
-func (this *context) Next() {}
-
+func (this *context) ServeFile(path string) {
+	http.ServeFile(this.Resp, this.Req, path)
+}
 func (this *context) exec() {
 	for _, it := range this.handlers {
 		next, err := this.Invoke(it)
