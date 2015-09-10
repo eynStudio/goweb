@@ -14,8 +14,6 @@ type context struct {
 	Req      *http.Request
 	Resp     http.ResponseWriter
 	handlers []Handler
-	App      *App
-	Route    *Route
 	Params   map[string]string
 	Result   Result
 }
@@ -27,6 +25,7 @@ func (this *context) Header(key, val string) {
 func (this *context) ServeFile(path string) {
 	http.ServeFile(this.Resp, this.Req, path)
 }
+
 func (this *context) exec() {
 	for _, it := range this.handlers {
 		next, err := this.Invoke(it)

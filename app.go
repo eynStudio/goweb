@@ -66,15 +66,15 @@ func (this *App) runSetupHooks() {
 	}
 }
 func (this *App) NewContext(r *http.Request, rw http.ResponseWriter) *context {
-	c := &context{di.New(), r, rw, this.handlers, nil, nil, make(map[string]string), nil}
+	c := &context{di.New(), r, rw, this.handlers, make(map[string]string), nil}
 	c.MapAs(c, (*Context)(nil))
+	c.MapAs(rw, (*http.ResponseWriter)(nil))
+	c.Map(r)
 	c.SetParent(this)
 	return c
 }
 func (this *App) handler(w http.ResponseWriter, r *http.Request) {
 	ctx := this.NewContext(r, w)
-	ctx.App = this
-
 	ctx.exec()
 
 	if ctx.Result != nil {
