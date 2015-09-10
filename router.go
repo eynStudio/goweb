@@ -148,22 +148,22 @@ func (this *router) FindController(route *Route, params map[string]string) *Cont
 	return ctrlInfo
 }
 
-func RouterFilter(ctx *context, fc []Filter) {
-	url := ctx.Req.URL.Path
+func RouterHandler(ctx Context) bool {
+	url := ctx.(*context).Req.URL.Path
 	fmt.Println(url)
 
-	ctx.Route, ctx.Params = ctx.App.Router.FindRoute(url)
-	if ctx.Route == nil {
-		ctx.Result = &JsonResult{"route not found"}
-	} else {
-		fc[0](ctx, fc[1:])
+	ctx.(*context).Route, ctx.(*context).Params = ctx.(*context).App.Router.FindRoute(url)
+	if ctx.(*context).Route == nil {
+		ctx.(*context).Result = &JsonResult{"route not found"}
+		return false
 	}
+	return true
 }
 
-func ControllerFilter(ctx *context, fc []Filter) {
-	ctrlInfo := ctx.App.Router.FindController(ctx.Route, ctx.Params)
-	execController(ctrlInfo, ctx)
-	fc[0](ctx, fc[1:])
+func ControllerHandler(ctx Context) bool {
+	ctrlInfo := ctx.(*context).App.Router.FindController(ctx.(*context).Route, ctx.(*context).Params)
+	execController(ctrlInfo, ctx.(*context))
+	return true
 }
 
 func execController(ctrlInfo *ControllerInfo, ctx *context) {

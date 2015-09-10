@@ -14,6 +14,7 @@ type App struct {
 	Config     *Config
 	Server     *http.Server
 	SetupHooks []func()
+	handlers   []Handler
 	Router
 }
 
@@ -21,7 +22,7 @@ func NewApp(name string) *App {
 	r := NewRouter()
 	di.Root.MapAs(r, (*Router)(nil))
 	c := LoadConfig(name)
-	app := &App{di.Root, name, c, nil, nil, r}
+	app := &App{Container: di.Root, Name: name, Config: c, Router: r}
 	app.Server = &http.Server{
 		Addr:         fmt.Sprintf(":%d", c.Port),
 		Handler:      http.HandlerFunc(app.handler),
@@ -47,6 +48,13 @@ func (this *App) Start() {
 		}
 	}
 }
+
+func (this *App) Use(h Handler) *App {
+	checkHandler(h)
+	this.handlers = append(this.handlers, h)
+	return this
+}
+
 func (this *App) UseHook(f func()) *App {
 	this.SetupHooks = append(this.SetupHooks, f)
 	return this
@@ -58,14 +66,16 @@ func (this *App) runSetupHooks() {
 	}
 }
 func (this *App) NewContext(r *http.Request, rw http.ResponseWriter) *context {
-	c := &context{di.New(), r, rw, nil, nil, make(map[string]string), nil}
+	c := &context{di.New(), r, rw, this.handlers, nil, nil, make(map[string]string), nil}
+	c.MapAs(c, (*Context)(nil))
 	c.SetParent(this)
 	return c
 }
 func (this *App) handler(w http.ResponseWriter, r *http.Request) {
 	ctx := this.NewContext(r, w)
 	ctx.App = this
-	Filters[0](ctx, Filters[1:])
+
+	ctx.exec()
 
 	if ctx.Result != nil {
 		ctx.Result.Apply(ctx)
