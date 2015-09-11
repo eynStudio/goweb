@@ -3,6 +3,7 @@ package goweb
 import (
 	"fmt"
 	"github.com/eynstudio/gobreak/di"
+	"net/http"
 	"reflect"
 	"regexp"
 	"strings"
@@ -149,13 +150,13 @@ func (this *router) FindController(route *Route, params map[string]string) *Cont
 	return ctrlInfo
 }
 
-func RouterHandler(ctx Context, r Router) bool {
-	url := ctx.(*context).Req.URL.Path
+func RouterHandler(ctx Context, r Router, req *http.Request) bool {
+	url := req.URL.Path
 	fmt.Println(url)
 
 	route, params := r.FindRoute(url)
 	if route == nil {
-		ctx.(*context).Result = &JsonResult{"route not found"}
+		ctx.Json("route not found")
 		return false
 	}
 	ctrlInfo := r.FindController(route, params)
