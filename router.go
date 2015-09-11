@@ -29,8 +29,8 @@ type Route struct {
 type Router interface {
 	Register(controller interface{})
 	Route(path string)
-	FindRoute(url string) (*Route, map[string]string)
-	FindController(route *Route, params map[string]string) *ControllerInfo
+	FindRoute(url string) (*Route, Values)
+	FindController(route *Route, params Values) *ControllerInfo
 }
 type router struct {
 	Routes []Route
@@ -97,19 +97,19 @@ func (this *Route) parse() {
 	fmt.Printf("%#v\n", this)
 }
 
-func (this *Route) Exec(path string) (bool, map[string]string) {
+func (this *Route) Exec(path string) (bool, Values) {
 	reg := regexp.MustCompile(this.Regexp)
 	if !reg.MatchString(path) {
 		return false, nil
 	}
 
 	all := reg.FindStringSubmatch(path)[1:]
-	params := make(map[string]string, len(all))
+	vals := make(Values, len(all))
 
 	for i, param := range all {
-		params[this.ParamNames[i]] = param
+		vals.Set(this.ParamNames[i], param)
 	}
-	return true, params
+	return true, vals
 }
 
 func (this *router) Route(path string) {
@@ -134,18 +134,19 @@ func (this *router) Register(controller interface{}) {
 	}
 }
 
-func (this *router) FindRoute(url string) (*Route, map[string]string) {
+func (this *router) FindRoute(url string) (*Route, Values) {
 	for _, r := range this.Routes {
-		match, params := r.Exec(url)
+		match, vals := r.Exec(url)
 		if match {
-			fmt.Printf("%#v\n", params)
-			return &r, params
+			fmt.Printf("%#v\n", vals)
+			return &r, vals
 		}
 	}
 	return nil, nil
 }
-func (this *router) FindController(route *Route, params map[string]string) *ControllerInfo {
-	ctrl := params["ctrl"]
+
+func (this *router) FindController(route *Route, vals Values) *ControllerInfo {
+	ctrl, _ := vals.Get("ctrl")
 	ctrlInfo := this.Ctrls[ctrl]
 	return ctrlInfo
 }
@@ -159,20 +160,22 @@ func RouterHandler(ctx Context, r Router, req *http.Request) bool {
 		ctx.Json("route not found")
 		return false
 	}
-	ctrlInfo := r.FindController(route, params)
-	execController(ctrlInfo, ctx.(*context))
+	ctx.Map(params)
+	ctx.Map(route)
 	return true
 }
 
-func execController(ctrlInfo *ControllerInfo, ctx *context) {
-	ctrl := reflect.New(ctrlInfo.Type)
-	method := strings.ToLower(ctx.Req.Method)
+func CtrlHandler(ctx Context, req *http.Request, r Router, route *Route, params Values) bool {
+	ctrlInfo := r.FindController(route, params)
+	ctx.Map(ctrlInfo)
+
+	method := strings.ToLower(req.Method)
 	var act ControllerMethod
-	if action, ok := ctx.Params["action"]; ok {
+	if action, ok := params.Get("action"); ok {
 		if m, ok := ctrlInfo.Methods[method+action]; ok {
 			act = m
 		}
-	} else if id, ok := ctx.Params["id"]; ok && id != "" {
+	} else if id, ok := params.Get("id"); ok && id != "" {
 		if m, ok := ctrlInfo.Methods[method+"id"]; ok {
 			act = m
 		}
@@ -180,12 +183,22 @@ func execController(ctrlInfo *ControllerInfo, ctx *context) {
 		act = m
 	}
 
-	if act.Name != "" {
-		fmt.Println(act.Name)
-		ctx.Exec(ctrl.MethodByName(act.Name), act.Args)
-		fmt.Println(ctx.Result)
-		fmt.Println(ctrl.Elem())
-	} else {
+	if act.Name == "" {
 		fmt.Println("No Action!")
+		return false
 	}
+
+	ctx.Map(act)
+	fmt.Println(act.Name)
+	return true
+}
+func BindingHandler() bool {
+
+	return true
+}
+func ActionHandler(ctx Context, ctrlInfo *ControllerInfo, act ControllerMethod) bool {
+	ctrl := reflect.New(ctrlInfo.Type)
+	ctx.Exec(ctrl.MethodByName(act.Name), act.Args)
+	fmt.Println(ctx.(*context).Result)
+	return true
 }
