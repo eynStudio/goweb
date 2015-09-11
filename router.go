@@ -2,6 +2,7 @@ package goweb
 
 import (
 	"fmt"
+	"github.com/eynstudio/gobreak/di"
 	"reflect"
 	"regexp"
 	"strings"
@@ -128,7 +129,7 @@ func (this *router) Register(controller interface{}) {
 
 	for i, j := 0, c.NumMethod(); i < j; i++ {
 		m := c.Method(i)
-		ctrl.Methods[strings.ToLower(m.Name)] = ControllerMethod{m.Name, nil}
+		ctrl.Methods[strings.ToLower(m.Name)] = ControllerMethod{m.Name, di.GetMethodArgs(m.Type)}
 	}
 }
 
@@ -164,7 +165,6 @@ func RouterHandler(ctx Context, r Router) bool {
 
 func execController(ctrlInfo *ControllerInfo, ctx *context) {
 	ctrl := reflect.New(ctrlInfo.Type)
-	ctrl.Interface().(Controller).SetCtx(ctx)
 	method := strings.ToLower(ctx.Req.Method)
 	var act ControllerMethod
 	if action, ok := ctx.Params["action"]; ok {
@@ -181,7 +181,7 @@ func execController(ctrlInfo *ControllerInfo, ctx *context) {
 
 	if act.Name != "" {
 		fmt.Println(act.Name)
-		ctx.Result = ctrl.MethodByName(act.Name).Call(nil)[0].Interface().(Result)
+		ctx.Exec(ctrl.MethodByName(act.Name), act.Args)
 		fmt.Println(ctx.Result)
 		fmt.Println(ctrl.Elem())
 	} else {

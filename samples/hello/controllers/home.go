@@ -8,11 +8,11 @@ type Home struct {
 	BaseController
 }
 
-func (this *Home) Get() Result {
-	return TemplateResult{"index", "GoWeb"}
+func (this *Home) Get(ctx Context) {
+	ctx.Tmpl("index", "GoWeb")
 }
 
-func (this *Home) GetXyz() Result {
+func (this *Home) GetXyz(ctx Context) {
 	data := struct{ Name string }{"XYZ"}
-	return JsonResult{data}
+	ctx.Json(data)
 }

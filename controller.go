@@ -5,11 +5,9 @@ import (
 )
 
 type Controller interface {
-	SetCtx(ctx *context)
 }
 
 type BaseController struct {
-	Ctx *context `di`
 }
 
 type ControllerInfo struct {
@@ -19,11 +17,7 @@ type ControllerInfo struct {
 }
 type ControllerMethod struct {
 	Name string
-	Args []*ControllerMethodArg
-}
-type ControllerMethodArg struct {
-	Name string
-	Type reflect.Type
+	Args []reflect.Type
 }
 
 func NewControllerInfo(name string, t reflect.Type) *ControllerInfo {
@@ -32,16 +26,4 @@ func NewControllerInfo(name string, t reflect.Type) *ControllerInfo {
 		Type:    t,
 		Methods: make(map[string]ControllerMethod),
 	}
-}
-
-func (this *BaseController) SetCtx(ctx *context) {
-	this.Ctx = ctx
-}
-
-func (this *BaseController) Html(html string) Result {
-	return &HtmlResult{html}
-}
-
-func (this *BaseController) Json(o interface{}) Result {
-	return &JsonResult{o}
 }
