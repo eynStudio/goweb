@@ -5,7 +5,6 @@ import (
 )
 
 type Home struct {
-	BaseController
 }
 
 func (this *Home) Get(ctx Context) {

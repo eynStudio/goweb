@@ -7,9 +7,6 @@ import (
 type Controller interface {
 }
 
-type BaseController struct {
-}
-
 type ControllerInfo struct {
 	Name    string
 	Type    reflect.Type
