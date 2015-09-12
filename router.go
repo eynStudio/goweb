@@ -3,7 +3,6 @@ package goweb
 import (
 	"fmt"
 	"github.com/eynstudio/gobreak/di"
-	"net/http"
 	"reflect"
 	"regexp"
 	"strings"
@@ -151,8 +150,8 @@ func (this *router) FindController(route *Route, vals Values) *ControllerInfo {
 	return ctrlInfo
 }
 
-func RouterHandler(ctx Context, r Router, req *http.Request) bool {
-	url := req.URL.Path
+func RouterHandler(ctx Context, r Router, req Req) bool {
+	url := req.Url()
 	fmt.Println(url)
 
 	route, params := r.FindRoute(url)
@@ -165,11 +164,11 @@ func RouterHandler(ctx Context, r Router, req *http.Request) bool {
 	return true
 }
 
-func CtrlHandler(ctx Context, req *http.Request, r Router, route *Route, params Values) bool {
+func CtrlHandler(ctx Context, req Req, r Router, route *Route, params Values) bool {
 	ctrlInfo := r.FindController(route, params)
 	ctx.Map(ctrlInfo)
 
-	method := strings.ToLower(req.Method)
+	method :=req.Method()
 	var act ControllerMethod
 	if action, ok := params.Get("action"); ok {
 		if m, ok := ctrlInfo.Methods[method+action]; ok {
@@ -192,7 +191,7 @@ func CtrlHandler(ctx Context, req *http.Request, r Router, route *Route, params 
 	fmt.Println(act.Name)
 	return true
 }
-func BindingHandler() bool {
+func BindingHandler(ctx Context, req Req) bool {
 
 	return true
 }

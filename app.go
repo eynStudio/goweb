@@ -66,10 +66,12 @@ func (this *App) runSetupHooks() {
 	}
 }
 func (this *App) NewContext(r *http.Request, rw http.ResponseWriter) *context {
-	c := &context{di.New(), r, rw, this.handlers, make(map[string]string), nil}
+	req:=Req{r}
+	resp:=&resp{rw}
+	c := &context{di.New(), req, resp, this.handlers, make(map[string]string), nil}
 	c.MapAs(c, (*Context)(nil))
-	c.MapAs(rw, (*http.ResponseWriter)(nil))
-	c.Map(r)
+	c.MapAs(resp, (*Resp)(nil))
+	c.Map(req)
 	c.SetParent(this)
 	return c
 }

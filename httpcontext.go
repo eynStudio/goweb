@@ -15,8 +15,8 @@ type Context interface {
 }
 type context struct {
 	di.Container
-	Req      *http.Request
-	Resp     http.ResponseWriter
+	Req 
+	Resp 
 	handlers []Handler
 	Params   map[string]string
 	Result   Result
@@ -27,7 +27,7 @@ func (this *context) Header(key, val string) {
 }
 
 func (this *context) ServeFile(path string) {
-	http.ServeFile(this.Resp, this.Req, path)
+	http.ServeFile(this.Resp, this.Req.Request, path)
 }
 
 func (this *context) Tmpl(tpl string, o interface{}) {
