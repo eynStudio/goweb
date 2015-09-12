@@ -1,11 +1,13 @@
 package goweb
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/eynstudio/gobreak/di"
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/eynstudio/gobreak/di"
 )
 
 const (
@@ -29,15 +31,15 @@ type Router interface {
 	Register(controller interface{})
 	Route(path string)
 	FindRoute(url string) (*Route, Values)
-	FindController(route *Route, params Values) *ControllerInfo
+	FindController(route *Route, params Values) *CtrlInfo
 }
 type router struct {
 	Routes []Route
-	Ctrls  map[string]*ControllerInfo
+	Ctrls  map[string]*CtrlInfo
 }
 
 func NewRouter() Router {
-	return &router{Ctrls: make(map[string]*ControllerInfo)}
+	return &router{Ctrls: make(map[string]*CtrlInfo)}
 }
 
 func NewRoute(path string) (route *Route) {
@@ -124,12 +126,12 @@ func (this *router) Register(controller interface{}) {
 	fmt.Println(c)
 	name := strings.ToLower(c.Elem().Name())
 
-	ctrl := NewControllerInfo(name, c.Elem())
+	ctrl := NewCtrlInfo(name, c.Elem())
 	this.Ctrls[name] = ctrl
 
 	for i, j := 0, c.NumMethod(); i < j; i++ {
 		m := c.Method(i)
-		ctrl.Methods[strings.ToLower(m.Name)] = ControllerMethod{m.Name, di.GetMethodArgs(m.Type)}
+		ctrl.Methods[strings.ToLower(m.Name)] = CtrlAction{m.Name, di.GetMethodArgs(m.Type)}
 	}
 }
 
@@ -144,7 +146,7 @@ func (this *router) FindRoute(url string) (*Route, Values) {
 	return nil, nil
 }
 
-func (this *router) FindController(route *Route, vals Values) *ControllerInfo {
+func (this *router) FindController(route *Route, vals Values) *CtrlInfo {
 	ctrl, _ := vals.Get("ctrl")
 	ctrlInfo := this.Ctrls[ctrl]
 	return ctrlInfo
@@ -168,8 +170,8 @@ func CtrlHandler(ctx Context, req Req, r Router, route *Route, params Values) bo
 	ctrlInfo := r.FindController(route, params)
 	ctx.Map(ctrlInfo)
 
-	method :=req.Method()
-	var act ControllerMethod
+	method := req.Method()
+	var act CtrlAction
 	if action, ok := params.Get("action"); ok {
 		if m, ok := ctrlInfo.Methods[method+action]; ok {
 			act = m
@@ -191,11 +193,21 @@ func CtrlHandler(ctx Context, req Req, r Router, route *Route, params Values) bo
 	fmt.Println(act.Name)
 	return true
 }
-func BindingHandler(ctx Context, req Req) bool {
+func BindingHandler(ctx Context, req Req, act CtrlAction) bool {
+	if req.IsJsonContent() && req.Body != nil && len(act.Args) > 0 && act.Args[0].Kind() != reflect.Interface {
+		defer req.Body.Close()
 
+		data := reflect.New(act.Args[0])
+		err := json.NewDecoder(req.Body).Decode(data.Interface())
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			ctx.Map(data.Elem().Interface())
+		}
+	}
 	return true
 }
-func ActionHandler(ctx Context, ctrlInfo *ControllerInfo, act ControllerMethod) bool {
+func ActionHandler(ctx Context, ctrlInfo *CtrlInfo, act CtrlAction) bool {
 	ctrl := reflect.New(ctrlInfo.Type)
 	ctx.Exec(ctrl.MethodByName(act.Name), act.Args)
 	fmt.Println(ctx.(*context).Result)

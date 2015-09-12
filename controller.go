@@ -7,20 +7,20 @@ import (
 type Controller interface {
 }
 
-type ControllerInfo struct {
+type CtrlInfo struct {
 	Name    string
 	Type    reflect.Type
-	Methods map[string]ControllerMethod
+	Methods map[string]CtrlAction
 }
-type ControllerMethod struct {
+type CtrlAction struct {
 	Name string
 	Args []reflect.Type
 }
 
-func NewControllerInfo(name string, t reflect.Type) *ControllerInfo {
-	return &ControllerInfo{
+func NewCtrlInfo(name string, t reflect.Type) *CtrlInfo {
+	return &CtrlInfo{
 		Name:    name,
 		Type:    t,
-		Methods: make(map[string]ControllerMethod),
+		Methods: make(map[string]CtrlAction),
 	}
 }
