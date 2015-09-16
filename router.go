@@ -176,7 +176,7 @@ func CtrlHandler(ctx Context, req Req, r Router, route *Route, params Values) bo
 		if m, ok := ctrlInfo.Methods[method+action]; ok {
 			act = m
 		}
-	} else if id, ok := params.Get("id"); ok && id != "" {
+	} else if _, ok := params.Get("id"); ok {
 		if m, ok := ctrlInfo.Methods[method+"id"]; ok {
 			act = m
 		}
