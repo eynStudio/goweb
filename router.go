@@ -209,6 +209,7 @@ func BindingHandler(ctx Context, req Req, act CtrlAction) bool {
 }
 func ActionHandler(ctx Context, ctrlInfo *CtrlInfo, act CtrlAction) bool {
 	ctrl := reflect.New(ctrlInfo.Type)
+	ctx.Apply(ctrl.Interface())
 	ctx.Exec(ctrl.MethodByName(act.Name), act.Args)
 	fmt.Println(ctx.(*context).Result)
 	return true
