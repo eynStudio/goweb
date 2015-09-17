@@ -169,29 +169,25 @@ func RouterHandler(ctx Context, r Router, req Req) bool {
 func CtrlHandler(ctx Context, req Req, r Router, route *Route, params Values) bool {
 	ctrlInfo := r.FindController(route, params)
 	ctx.Map(ctrlInfo)
-
 	method := req.Method()
-	var act CtrlAction
 	if action, ok := params.Get("action"); ok {
 		if m, ok := ctrlInfo.Methods[method+action]; ok {
-			act = m
+			ctx.Map(m)
+			return true
 		}
-	} else if _, ok := params.Get("id"); ok {
+	}
+	if _, ok := params.Get("id"); ok {
 		if m, ok := ctrlInfo.Methods[method+"id"]; ok {
-			act = m
+			ctx.Map(m)
+			return true
 		}
-	} else if m, ok := ctrlInfo.Methods[method]; ok {
-		act = m
 	}
-
-	if act.Name == "" {
-		fmt.Println("No Action!")
-		return false
+	if m, ok := ctrlInfo.Methods[method]; ok {
+		ctx.Map(m)
+		return true
 	}
-
-	ctx.Map(act)
-	fmt.Println(act.Name)
-	return true
+	fmt.Println("No Action!")
+	return false
 }
 func BindingHandler(ctx Context, req Req, act CtrlAction) bool {
 	if req.IsJsonContent() && req.Body != nil && len(act.Args) > 0 && act.Args[0].Kind() != reflect.Interface {
