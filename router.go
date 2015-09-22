@@ -171,7 +171,7 @@ func CtrlHandler(ctx Context, req Req, r Router, route *Route, params Values) bo
 	ctx.Map(ctrlInfo)
 	method := req.Method()
 	if action, ok := params.Get("action"); ok {
-		if m, ok := ctrlInfo.Methods[method+action]; ok {
+		if m, ok := ctrlInfo.Methods[method+strings.ToLower(action)]; ok {
 			ctx.Map(m)
 			return true
 		}
