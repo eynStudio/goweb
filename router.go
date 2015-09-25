@@ -170,8 +170,20 @@ func CtrlHandler(ctx Context, req Req, r Router, route *Route, params Values) bo
 	ctrlInfo := r.FindController(route, params)
 	ctx.Map(ctrlInfo)
 	method := req.Method()
-	if action, ok := params.Get("action"); ok {
-		if m, ok := ctrlInfo.Methods[method+strings.ToLower(action)]; ok {
+	if act2, ok := params.Get("act2"); ok {
+		if m, ok := ctrlInfo.Methods[method+strings.ToLower(act2)]; ok {
+			ctx.Map(m)
+			return true
+		}
+		if act1, ok := params.Get("act1"); ok {
+			if m, ok := ctrlInfo.Methods[method+strings.ToLower(act1)+strings.ToLower(act2)]; ok {
+				ctx.Map(m)
+				return true
+			}
+		}
+	}
+	if act1, ok := params.Get("act1"); ok {
+		if m, ok := ctrlInfo.Methods[method+strings.ToLower(act1)]; ok {
 			ctx.Map(m)
 			return true
 		}
