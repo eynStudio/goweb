@@ -11,12 +11,13 @@ type Context interface {
 	Tmpl(tpl string, o interface{})
 	Html(html string)
 	Json(o interface{})
+	Ok()
 	Forbidden()
 }
 type context struct {
 	di.Container
-	Req 
-	Resp 
+	Req
+	Resp
 	handlers []Handler
 	Params   map[string]string
 	Result   Result
@@ -24,6 +25,10 @@ type context struct {
 
 func (this *context) Header(key, val string) {
 	this.Resp.Header().Set(key, val)
+}
+
+func (this *context) Ok() {
+	this.Resp.WriteHeader(http.StatusOK)
 }
 
 func (this *context) ServeFile(path string) {

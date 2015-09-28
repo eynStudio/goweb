@@ -66,8 +66,8 @@ func (this *App) runSetupHooks() {
 	}
 }
 func (this *App) NewContext(r *http.Request, rw http.ResponseWriter) *context {
-	req:=Req{r}
-	resp:=&resp{rw}
+	req := Req{r}
+	resp := &resp{rw}
 	c := &context{di.New(), req, resp, this.handlers, make(map[string]string), nil}
 	c.MapAs(c, (*Context)(nil))
 	c.MapAs(resp, (*Resp)(nil))
@@ -82,7 +82,7 @@ func (this *App) handler(w http.ResponseWriter, r *http.Request) {
 	if ctx.Result != nil {
 		ctx.Result.Apply(ctx)
 	} else {
-		fmt.Fprintf(w, "Hi, This is an example of http service in golang!")
+		ctx.Ok()
 	}
 
 	if w, ok := ctx.Resp.(io.Closer); ok {
