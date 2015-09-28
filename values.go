@@ -1,5 +1,9 @@
 package goweb
 
+import (
+	"gopkg.in/mgo.v2/bson"
+)
+
 type Values map[string][]string
 
 func (v Values) Get(key string) (string, bool) {
@@ -24,3 +28,29 @@ func (v Values) Add(key, value string) {
 func (v Values) Del(key string) {
 	delete(v, key)
 }
+
+func (v Values) Has(key string) bool {
+	_, ok := v[key]
+	return ok
+}
+
+func (v Values) HasId() bool  { return v.Has("id") }
+func (v Values) HasId1() bool { return v.Has("id1") }
+func (v Values) HasId2() bool { return v.Has("id2") }
+
+func (v Values) GetVal(key string) string {
+	val, _ := v.Get(key)
+	return val
+}
+
+func (v Values) GetId() string  { return v.GetVal("id") }
+func (v Values) GetId1() string { return v.GetVal("id1") }
+func (v Values) GetId2() string { return v.GetVal("id2") }
+
+func (v Values) GetObjId() bson.ObjectId  { return bson.ObjectIdHex(v.GetVal("id")) }
+func (v Values) GetObjId1() bson.ObjectId { return bson.ObjectIdHex(v.GetVal("id1")) }
+func (v Values) GetObjId2() bson.ObjectId { return bson.ObjectIdHex(v.GetVal("id2")) }
+
+func (v Values) IsObjId() bool  { return bson.IsObjectIdHex(v.GetVal("id")) }
+func (v Values) IsObjId1() bool { return bson.IsObjectIdHex(v.GetVal("id1")) }
+func (v Values) IsObjId2() bool { return bson.IsObjectIdHex(v.GetVal("id2")) }

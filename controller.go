@@ -1,12 +1,19 @@
 package goweb
 
 import (
+	"fmt"
 	"reflect"
 )
 
-type Controller interface {
+type Controller struct {
+	Ctx    Context `di`
+	Req    Req     `di`
+	Params Values  `di`
 }
 
+func (p*Controller) Hi(){
+	fmt.Println("hi")
+}
 type CtrlInfo struct {
 	Name    string
 	Type    reflect.Type

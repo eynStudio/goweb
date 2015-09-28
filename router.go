@@ -163,6 +163,11 @@ func RouterHandler(ctx Context, r Router, req Req) bool {
 	}
 	ctx.Map(params)
 	ctx.Map(route)
+
+	ctrl := &Controller{}
+	ctx.Apply(ctrl)
+	ctx.Map(ctrl)
+
 	return true
 }
 
