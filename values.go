@@ -1,8 +1,6 @@
 package goweb
 
-import (
-	"gopkg.in/mgo.v2/bson"
-)
+import ()
 
 type Values map[string][]string
 
@@ -46,11 +44,3 @@ func (v Values) GetVal(key string) string {
 func (v Values) GetId() string  { return v.GetVal("id") }
 func (v Values) GetId1() string { return v.GetVal("id1") }
 func (v Values) GetId2() string { return v.GetVal("id2") }
-
-func (v Values) GetObjId() bson.ObjectId  { return bson.ObjectIdHex(v.GetVal("id")) }
-func (v Values) GetObjId1() bson.ObjectId { return bson.ObjectIdHex(v.GetVal("id1")) }
-func (v Values) GetObjId2() bson.ObjectId { return bson.ObjectIdHex(v.GetVal("id2")) }
-
-func (v Values) IsObjId() bool  { return bson.IsObjectIdHex(v.GetVal("id")) }
-func (v Values) IsObjId1() bool { return bson.IsObjectIdHex(v.GetVal("id1")) }
-func (v Values) IsObjId2() bool { return bson.IsObjectIdHex(v.GetVal("id2")) }
