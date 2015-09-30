@@ -1,7 +1,6 @@
 package goweb
 
 import (
-	"fmt"
 	"reflect"
 )
 
@@ -11,23 +10,23 @@ type Controller struct {
 	Params Values  `di`
 }
 
-func (p*Controller) Hi(){
-	fmt.Println("hi")
-}
 type CtrlInfo struct {
 	Name    string
+	Auth	bool
 	Type    reflect.Type
 	Methods map[string]CtrlAction
 }
+
 type CtrlAction struct {
 	Name string
 	Args []reflect.Type
 }
 
-func NewCtrlInfo(name string, t reflect.Type) *CtrlInfo {
+func NewCtrlInfo(name string, t reflect.Type,needAuth bool) *CtrlInfo {
 	return &CtrlInfo{
 		Name:    name,
 		Type:    t,
+		Auth:needAuth,
 		Methods: make(map[string]CtrlAction),
 	}
 }

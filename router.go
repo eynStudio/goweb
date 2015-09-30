@@ -28,7 +28,8 @@ type Route struct {
 }
 
 type Router interface {
-	Register(controller interface{})
+	RegisterAuth(controller interface{})
+	RegisterAnon(controller interface{})
 	Route(path string)
 	FindRoute(url string) (*Route, Values)
 	FindController(route *Route, params Values) *CtrlInfo
@@ -115,18 +116,22 @@ func (this *Route) Exec(path string) (bool, Values) {
 
 func (this *router) Route(path string) {
 	r := NewRoute(path)
-	r.Exec("/api/abc-xyz/123")
-	r.Exec("/api/abc-xyz/opq")
-
 	this.Routes = append(this.Routes, *r)
 }
 
-func (this *router) Register(controller interface{}) {
+func (this *router) RegisterAuth(controller interface{}) {
+	this.register(controller,true)
+}
+func (this *router) RegisterAnon(controller interface{}) {
+	this.register(controller,false)
+}
+
+func (this *router) register(controller interface{},needAuth bool) {
 	c := reflect.TypeOf(controller)
 	fmt.Println(c)
 	name := strings.ToLower(c.Elem().Name())
 
-	ctrl := NewCtrlInfo(name, c.Elem())
+	ctrl := NewCtrlInfo(name, c.Elem(),needAuth)
 	this.Ctrls[name] = ctrl
 
 	for i, j := 0, c.NumMethod(); i < j; i++ {
@@ -164,16 +169,17 @@ func RouterHandler(ctx Context, r Router, req Req) bool {
 	ctx.Map(params)
 	ctx.Map(route)
 
-	ctrl := &Controller{}
-	ctx.Apply(ctrl)
-	ctx.Map(ctrl)
+	ctrlInfo := r.FindController(route, params)
+	ctx.Map(ctrlInfo)
 
+	baseCtrl := &Controller{}
+	ctx.Apply(baseCtrl)
+	ctx.Map(baseCtrl)
+	
 	return true
 }
 
-func CtrlHandler(ctx Context, req Req, r Router, route *Route, params Values) bool {
-	ctrlInfo := r.FindController(route, params)
-	ctx.Map(ctrlInfo)
+func CtrlHandler(ctx Context, req Req, ctrlInfo *CtrlInfo,params Values) bool {
 	method := req.Method()
 	if act2, ok := params.Get("act2"); ok {
 		if m, ok := ctrlInfo.Methods[method+strings.ToLower(act2)]; ok {
@@ -220,7 +226,7 @@ func BindingHandler(ctx Context, req Req, act CtrlAction) bool {
 	}
 	return true
 }
-func ActionHandler(ctx Context, ctrlInfo *CtrlInfo, act CtrlAction) bool {
+func ActionHandler(ctx Context, ctrlInfo *CtrlInfo, act CtrlAction) bool {		
 	ctrl := reflect.New(ctrlInfo.Type)
 	ctx.Apply(ctrl.Interface())
 	ctx.Exec(ctrl.MethodByName(act.Name), act.Args)
