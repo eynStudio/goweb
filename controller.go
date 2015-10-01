@@ -12,7 +12,7 @@ type Controller struct {
 
 type CtrlInfo struct {
 	Name    string
-	Auth	bool
+	Auth    bool
 	Type    reflect.Type
 	Methods map[string]CtrlAction
 }
@@ -22,11 +22,11 @@ type CtrlAction struct {
 	Args []reflect.Type
 }
 
-func NewCtrlInfo(name string, t reflect.Type,needAuth bool) *CtrlInfo {
+func NewCtrlInfo(name string, t reflect.Type, needAuth bool) *CtrlInfo {
 	return &CtrlInfo{
 		Name:    name,
 		Type:    t,
-		Auth:needAuth,
+		Auth:    needAuth,
 		Methods: make(map[string]CtrlAction),
 	}
 }

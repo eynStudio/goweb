@@ -14,7 +14,7 @@ var NilUserId *USER_ID
 
 func MgoRouterHandler(ctx Context, r Router, req Req) bool {
 	url := req.Url()
-	fmt.Println(url)
+	fmt.Println(req.Method()+" : "+ url)
 
 	route, params := r.FindRoute(url)
 	if route == nil {
@@ -26,7 +26,8 @@ func MgoRouterHandler(ctx Context, r Router, req Req) bool {
 
 	ctrlInfo := r.FindController(route, params)
 	ctx.Map(ctrlInfo)
-
+	
+	
 	ctrl := &MgoController{}
 	ctx.Apply(ctrl)
 	ctx.Map(ctrl)

@@ -69,8 +69,6 @@ func (this *Route) parse() {
 	last := 0
 	all := reg.FindAllStringSubmatchIndex(pattern, -1)
 	compiled := "^"
-	fmt.Printf("%q\n", reg.FindAllStringSubmatch(pattern, -1))
-	fmt.Println(all)
 	for _, r := range all {
 		segment := pattern[last:r[0]]
 		this.Segments = append(this.Segments, segment)
@@ -96,7 +94,6 @@ func (this *Route) parse() {
 	this.Segments = append(this.Segments, segment)
 	this.SourcePath = pattern
 	this.Prefix = this.Segments[0]
-	fmt.Printf("%#v\n", this)
 }
 
 func (this *Route) Exec(path string) (bool, Values) {
@@ -128,7 +125,6 @@ func (this *router) RegisterAnon(controller interface{}) {
 
 func (this *router) register(controller interface{},needAuth bool) {
 	c := reflect.TypeOf(controller)
-	fmt.Println(c)
 	name := strings.ToLower(c.Elem().Name())
 
 	ctrl := NewCtrlInfo(name, c.Elem(),needAuth)
@@ -159,7 +155,7 @@ func (this *router) FindController(route *Route, vals Values) *CtrlInfo {
 
 func RouterHandler(ctx Context, r Router, req Req) bool {
 	url := req.Url()
-	fmt.Println(url)
+	fmt.Println(req.Method()+" : "+ url)
 
 	route, params := r.FindRoute(url)
 	if route == nil {
