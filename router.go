@@ -117,17 +117,17 @@ func (this *router) Route(path string) {
 }
 
 func (this *router) RegisterAuth(controller interface{}) {
-	this.register(controller,true)
+	this.register(controller, true)
 }
 func (this *router) RegisterAnon(controller interface{}) {
-	this.register(controller,false)
+	this.register(controller, false)
 }
 
-func (this *router) register(controller interface{},needAuth bool) {
+func (this *router) register(controller interface{}, needAuth bool) {
 	c := reflect.TypeOf(controller)
 	name := strings.ToLower(c.Elem().Name())
 
-	ctrl := NewCtrlInfo(name, c.Elem(),needAuth)
+	ctrl := NewCtrlInfo(name, c.Elem(), needAuth)
 	this.Ctrls[name] = ctrl
 
 	for i, j := 0, c.NumMethod(); i < j; i++ {
@@ -155,7 +155,7 @@ func (this *router) FindController(route *Route, vals Values) *CtrlInfo {
 
 func RouterHandler(ctx Context, r Router, req Req) bool {
 	url := req.Url()
-	fmt.Println(req.Method()+" : "+ url)
+	fmt.Println(req.Method() + " : " + url)
 
 	route, params := r.FindRoute(url)
 	if route == nil {
@@ -171,11 +171,11 @@ func RouterHandler(ctx Context, r Router, req Req) bool {
 	baseCtrl := &Controller{}
 	ctx.Apply(baseCtrl)
 	ctx.Map(baseCtrl)
-	
+
 	return true
 }
 
-func CtrlHandler(ctx Context, req Req, ctrlInfo *CtrlInfo,params Values) bool {
+func CtrlHandler(ctx Context, req Req, ctrlInfo *CtrlInfo, params Values) bool {
 	method := req.Method()
 	if act2, ok := params.Get("act2"); ok {
 		if m, ok := ctrlInfo.Methods[method+strings.ToLower(act2)]; ok {
@@ -222,10 +222,9 @@ func BindingHandler(ctx Context, req Req, act CtrlAction) bool {
 	}
 	return true
 }
-func ActionHandler(ctx Context, ctrlInfo *CtrlInfo, act CtrlAction) bool {		
+func ActionHandler(ctx Context, ctrlInfo *CtrlInfo, act CtrlAction) bool {
 	ctrl := reflect.New(ctrlInfo.Type)
 	ctx.Apply(ctrl.Interface())
 	ctx.Exec(ctrl.MethodByName(act.Name), act.Args)
-	fmt.Println(ctx.(*context).Result)
 	return true
 }
