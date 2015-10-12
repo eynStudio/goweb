@@ -81,10 +81,7 @@ func (this *App) handler(w http.ResponseWriter, r *http.Request) {
 
 	if ctx.Result != nil {
 		ctx.Result.Apply(ctx)
-	} /*else {
-		ctx.Ok()
-	}*/
-
+	}
 	if w, ok := ctx.Resp.(io.Closer); ok {
 		w.Close()
 	}

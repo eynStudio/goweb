@@ -12,6 +12,7 @@ type Context interface {
 	Html(html string)
 	Json(o interface{})
 	Ok()
+	NotFound()
 	Forbidden()
 }
 type context struct {
@@ -28,9 +29,13 @@ func (this *context) Header(key, val string) {
 }
 
 func (this *context) Ok() {
-	this.Resp.WriteHeader(http.StatusOK)
+	//	this.Resp.WriteHeader(http.StatusOK)
+	this.Result = ResulOK
 }
-
+func (this *context) NotFound() {
+	this.Result = ResultNotFound
+	//	this.Resp.WriteHeader(http.StatusNotFound)
+}
 func (this *context) ServeFile(path string) {
 	http.ServeFile(this.Resp, this.Req.Request, path)
 }

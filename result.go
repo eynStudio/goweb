@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	ResultForbidden ErrorResult = ErrorResult{"Forbidden", http.StatusForbidden}
-	ResultNotFound  ErrorResult = ErrorResult{"NotFound", http.StatusNotFound}
+	ResultForbidden ErrorResult  = ErrorResult{"Forbidden", http.StatusForbidden}
+	ResultNotFound  ErrorResult  = ErrorResult{"NotFound", http.StatusNotFound}
+	ResulOK         StatusResult = StatusResult{http.StatusOK}
 )
 
 type Result interface {
@@ -21,6 +22,14 @@ type ErrorResult struct {
 
 func (this ErrorResult) Apply(ctx *context) {
 	http.Error(ctx.Resp, this.Msg, this.HttpCode)
+}
+
+type StatusResult struct {
+	HttpCode int
+}
+
+func (this StatusResult) Apply(ctx *context) {
+	ctx.Resp.WriteHeader(http.StatusNotFound)
 }
 
 type TemplateResult struct {
