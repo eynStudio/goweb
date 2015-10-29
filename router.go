@@ -195,7 +195,7 @@ func CtrlHandler(ctx Context, req Req, ctrlInfo *CtrlInfo, params Values) bool {
 			return true
 		}
 	}
-	if _, ok := params.Get("id"); ok {
+	if id, ok := params.Get("id");  ok && id!="" {
 		if m, ok := ctrlInfo.Methods[method+"id"]; ok {
 			ctx.Map(m)
 			return true
