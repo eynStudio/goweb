@@ -195,7 +195,7 @@ func CtrlHandler(ctx Context, req Req, ctrlInfo *CtrlInfo, params Values) bool {
 			return true
 		}
 	}
-	if id, ok := params.Get("id");  ok && id!="" {
+	if id, ok := params.Get("id"); ok && id != "" {
 		if m, ok := ctrlInfo.Methods[method+"id"]; ok {
 			ctx.Map(m)
 			return true
@@ -225,6 +225,16 @@ func BindingHandler(ctx Context, req Req, act CtrlAction) bool {
 func ActionHandler(ctx Context, ctrlInfo *CtrlInfo, act CtrlAction) bool {
 	ctrl := reflect.New(ctrlInfo.Type)
 	ctx.Apply(ctrl.Interface())
+
+	if m := ctrl.MethodByName("Before"); m.IsValid() {
+		ctx.Exec(m, nil)
+	}
+
 	ctx.Exec(ctrl.MethodByName(act.Name), act.Args)
+
+	if m := ctrl.MethodByName("After"); m.IsValid() {
+		ctx.Exec(m, nil)
+	}
+
 	return true
 }
