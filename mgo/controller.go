@@ -2,7 +2,6 @@ package mgo
 
 import (
 	. "github.com/eynstudio/gobreak"
-	"github.com/eynstudio/gobreak/di"
 	. "github.com/eynstudio/goweb"
 )
 
@@ -21,6 +20,6 @@ func (p *MgoController) HasId1() bool { return p.Params.GetVal("id1") != "" }
 func (p *MgoController) HasId2() bool { return p.Params.GetVal("id2") != "" }
 
 func (p *MgoController) UserId() GUID {
-	uid := p.Ctx.Get(di.InterfaceOf(NilUserId)).Interface().(string)
+	uid:= p.Ctx.Get(TYPE_GOWEB_USER_ID).Interface().(GOWEB_USER_ID)
 	return GUID(uid)
 }

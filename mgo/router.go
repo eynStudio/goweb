@@ -1,16 +1,17 @@
 package mgo
 
 import (
+	"reflect"
 	"fmt"
 	"strings"
-
+	"github.com/eynstudio/gobreak"
 	. "github.com/eynstudio/goweb"
 	"gopkg.in/mgo.v2/bson"
 )
 
-type USER_ID interface{}
-
-var NilUserId *USER_ID
+type GOWEB_USER_ID gobreak.GUID
+var nilUserId GOWEB_USER_ID
+var TYPE_GOWEB_USER_ID= reflect.TypeOf(nilUserId)
 
 func MgoRouterHandler(ctx Context, r Router, req Req) bool {
 	url := req.Url()
@@ -44,7 +45,7 @@ func MgoAuthHandler(ctx Context, ctrlInfo *CtrlInfo, req Req) bool {
 	if jbreak != "" {
 		token := strings.Split(jbreak, " ")[1]
 		if bson.IsObjectIdHex(token) {
-			ctx.MapAs(token,NilUserId)
+			ctx.Map(GOWEB_USER_ID(token))
 			return true
 		}
 	}
