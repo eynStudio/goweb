@@ -29,7 +29,7 @@ func NewApp(name string) *App {
 		ReadTimeout:  time.Minute,
 		WriteTimeout: time.Minute,
 	}
-
+	app.Map(c)
 	return app
 }
 

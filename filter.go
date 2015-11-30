@@ -1,18 +1,14 @@
 package goweb
 
-import (
-	"strings"
-)
+import "strings"
 
-func StaticHandler(ctx Context,req Req) bool {
-	url :=req.Url()
-		if strings.HasPrefix(url, "/favicon.ico") {
-		ctx.ServeFile(url[1:])
-		return false
-	}
-	if strings.HasPrefix(url, "/static") {
-		ctx.ServeFile(url[1:])
-		return false
+func StaticHandler(cfg *Config, ctx Context, req Req) bool {
+	url := req.Url()
+	for _, p := range cfg.ServeFiles {
+		if strings.HasPrefix(url, p) {
+			ctx.ServeFile(url[1:])
+			return false
+		}
 	}
 	return true
 }

@@ -10,6 +10,7 @@ type Config struct {
 	Tls      bool
 	CertFile string
 	KeyFile  string
+	ServeFiles []string
 }
 
 func LoadConfig(file string) (cfg *Config) {
