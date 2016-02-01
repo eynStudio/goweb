@@ -149,6 +149,9 @@ func (this *router) FindRoute(url string) (*Route, Values) {
 
 func (this *router) FindController(route *Route, vals Values) *CtrlInfo {
 	ctrl, _ := vals.Get("ctrl")
+	if ctrl == "" {
+		ctrl = "default"
+	}
 	ctrlInfo := this.Ctrls[ctrl]
 	return ctrlInfo
 }

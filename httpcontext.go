@@ -1,12 +1,14 @@
 package goweb
 
 import (
-	"github.com/eynstudio/gobreak/di"
 	"net/http"
+
+	"github.com/eynstudio/gobreak/di"
 )
 
 type Context interface {
 	di.Container
+	Header(key, val string)
 	ServeFile(path string)
 	Tmpl(tpl string, o interface{})
 	Html(html string)
