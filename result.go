@@ -2,6 +2,7 @@ package goweb
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -39,7 +40,9 @@ type TemplateResult struct {
 
 func (this TemplateResult) Apply(ctx *context) {
 	ctx.Header("Content-Type", "text/html; charset=utf-8")
-	MyTemplates.Execute(ctx.Resp, this.Tpl, this.Data)
+	if err := MyTemplates.Execute(ctx.Resp, this.Tpl, this.Data); err != nil {
+		log.Println(err)
+	}
 }
 
 type HtmlResult struct {
