@@ -180,33 +180,42 @@ func RouterHandler(ctx Context, r Router, req Req) bool {
 
 func CtrlHandler(ctx Context, req Req, ctrlInfo *CtrlInfo, params Values) bool {
 	method := req.Method()
-	if act2, ok := params.Get("act2"); ok {
-		if m, ok := ctrlInfo.Methods[method+strings.ToLower(act2)]; ok {
+	jBreakMethod := req.Header.Get("jBreak-Method")
+	if jBreakMethod != "" {
+		jBreakMethod = strings.ToLower(jBreakMethod)
+	}
+
+	var actions []string
+	act2, ok2 := params.Get("act2")
+	act1, ok1 := params.Get("act1")
+	_, ok := params.Get("id")
+
+	appendActions := func(act string) {
+		if jBreakMethod != "" {
+			actions = append(actions, method+act+jBreakMethod)
+		}
+		actions = append(actions, method+act)
+	}
+
+	if ok2 {
+		appendActions(strings.ToLower(act2))
+	}
+	if ok2 && ok1 {
+		appendActions(strings.ToLower(act1) + strings.ToLower(act2))
+	}
+	if ok1 {
+		appendActions(strings.ToLower(act1))
+	}
+	if ok {
+		appendActions("id")
+	}
+	appendActions("")
+
+	for _, act := range actions {
+		if m, ok := ctrlInfo.Methods[act]; ok {
 			ctx.Map(m)
 			return true
 		}
-		if act1, ok := params.Get("act1"); ok {
-			if m, ok := ctrlInfo.Methods[method+strings.ToLower(act1)+strings.ToLower(act2)]; ok {
-				ctx.Map(m)
-				return true
-			}
-		}
-	}
-	if act1, ok := params.Get("act1"); ok {
-		if m, ok := ctrlInfo.Methods[method+strings.ToLower(act1)]; ok {
-			ctx.Map(m)
-			return true
-		}
-	}
-	if id, ok := params.Get("id"); ok && id != "" {
-		if m, ok := ctrlInfo.Methods[method+"id"]; ok {
-			ctx.Map(m)
-			return true
-		}
-	}
-	if m, ok := ctrlInfo.Methods[method]; ok {
-		ctx.Map(m)
-		return true
 	}
 	fmt.Println("No Action!")
 	return false
