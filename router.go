@@ -25,12 +25,14 @@ type Route struct {
 	Regexp       string
 	Params       []string
 	ParamNames   []string
+	DefaultCtrl  string
 }
 
 type Router interface {
 	RegisterAuth(controller interface{})
 	RegisterAnon(controller interface{})
 	Route(path string)
+	RouteCtrl(path, ctrlName string)
 	FindRoute(url string) (*Route, Values)
 	FindController(route *Route, params Values) *CtrlInfo
 }
@@ -108,6 +110,9 @@ func (this *Route) Exec(path string) (bool, Values) {
 	for i, param := range all {
 		vals.Set(this.ParamNames[i], param)
 	}
+	if this.DefaultCtrl != "" {
+		vals.Set("ctrl", this.DefaultCtrl)
+	}
 	return true, vals
 }
 
@@ -115,7 +120,11 @@ func (this *router) Route(path string) {
 	r := NewRoute(path)
 	this.Routes = append(this.Routes, *r)
 }
-
+func (this *router) RouteCtrl(path, ctrlName string) {
+	r := NewRoute(path)
+	r.DefaultCtrl = ctrlName
+	this.Routes = append(this.Routes, *r)
+}
 func (this *router) RegisterAuth(controller interface{}) {
 	this.register(controller, true)
 }
