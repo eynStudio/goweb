@@ -30,7 +30,7 @@ type StatusResult struct {
 }
 
 func (this StatusResult) Apply(ctx *context) {
-	ctx.Resp.WriteHeader(this.HttpCode)
+	ctx.Resp.WriteHeader(http.StatusNotFound)
 }
 
 type TemplateResult struct {
