@@ -16,7 +16,7 @@ type Template struct {
 }
 
 func (this *Template) Load() {
-	this.Templates = template.Must(template.New("").Delims("[[", "]]").ParseGlob("views/*.tpl"))
+	this.Templates = template.Must(template.New("").Delims("[[", "]]").ParseGlob("views/*.*"))
 }
 
 func (this *Template) Execute(wr io.Writer, name string, data interface{}) error {
