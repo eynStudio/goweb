@@ -21,16 +21,16 @@ type ErrorResult struct {
 	HttpCode int
 }
 
-func (this ErrorResult) Apply(ctx *context) {
-	http.Error(ctx.Resp, this.Msg, this.HttpCode)
+func (p ErrorResult) Apply(ctx *context) {
+	http.Error(ctx.Resp, p.Msg, p.HttpCode)
 }
 
 type StatusResult struct {
 	HttpCode int
 }
 
-func (this StatusResult) Apply(ctx *context) {
-	ctx.Resp.WriteHeader(this.HttpCode)
+func (p StatusResult) Apply(ctx *context) {
+	ctx.Resp.WriteHeader(p.HttpCode)
 }
 
 type TemplateResult struct {
@@ -38,9 +38,9 @@ type TemplateResult struct {
 	Data interface{}
 }
 
-func (this TemplateResult) Apply(ctx *context) {
+func (p TemplateResult) Apply(ctx *context) {
 	ctx.Header("Content-Type", "text/html; charset=utf-8")
-	if err := MyTemplates.Execute(ctx.Resp, this.Tpl, this.Data); err != nil {
+	if err := MyTemplates.Execute(ctx.Resp, p.Tpl, p.Data); err != nil {
 		log.Println(err)
 	}
 }
@@ -49,18 +49,18 @@ type HtmlResult struct {
 	Html string
 }
 
-func (this HtmlResult) Apply(ctx *context) {
+func (p HtmlResult) Apply(ctx *context) {
 	ctx.Header("Content-Type", "text/html; charset=utf-8")
-	ctx.Resp.Write([]byte(this.Html))
+	ctx.Resp.Write([]byte(p.Html))
 }
 
 type JsonResult struct {
 	Data interface{}
 }
 
-func (this JsonResult) Apply(ctx *context) {
+func (p JsonResult) Apply(ctx *context) {
 	ctx.Header("Content-Type", "application/json; charset=utf-8")
-	b, err := json.Marshal(this.Data)
+	b, err := json.Marshal(p.Data)
 	if err != nil {
 		ErrorResult{"InternalServerError", http.StatusInternalServerError}.Apply(ctx)
 		return

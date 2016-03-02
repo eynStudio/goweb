@@ -13,6 +13,7 @@ type Context interface {
 	Tmpl(tpl string, o interface{})
 	Html(html string)
 	Json(o interface{})
+	Redirect(url string)
 	Ok()
 	NotFound()
 	Forbidden()
@@ -26,40 +27,45 @@ type context struct {
 	Result   Result
 }
 
-func (this *context) Header(key, val string) {
-	this.Resp.Header().Set(key, val)
+func (p *context) Header(key, val string) {
+	p.Resp.Header().Set(key, val)
 }
 
-func (this *context) Ok() {
+func (p *context) Ok() {
 	//	this.Resp.WriteHeader(http.StatusOK)
-	this.Result = ResulOK
+	p.Result = ResulOK
 }
-func (this *context) NotFound() {
-	this.Result = ResultNotFound
+
+func (p *context) Redirect(url string) {
+	http.Redirect(p.Resp, p.Req.Request, url, http.StatusFound)
+}
+
+func (p *context) NotFound() {
+	p.Result = ResultNotFound
 	//	this.Resp.WriteHeader(http.StatusNotFound)
 }
-func (this *context) ServeFile(path string) {
-	http.ServeFile(this.Resp, this.Req.Request, path)
+func (p *context) ServeFile(path string) {
+	http.ServeFile(p.Resp, p.Req.Request, path)
 }
 
-func (this *context) Tmpl(tpl string, o interface{}) {
-	this.Result = &TemplateResult{tpl, o}
+func (p *context) Tmpl(tpl string, o interface{}) {
+	p.Result = &TemplateResult{tpl, o}
 }
 
-func (this *context) Html(html string) {
-	this.Result = &HtmlResult{html}
+func (p *context) Html(html string) {
+	p.Result = &HtmlResult{html}
 }
 
-func (this *context) Json(o interface{}) {
-	this.Result = &JsonResult{o}
+func (p *context) Json(o interface{}) {
+	p.Result = &JsonResult{o}
 }
 
-func (this *context) Forbidden() {
-	this.Result = ResultForbidden
+func (p *context) Forbidden() {
+	p.Result = ResultForbidden
 }
-func (this *context) exec() {
-	for _, it := range this.handlers {
-		next, err := this.Invoke(it)
+func (p *context) exec() {
+	for _, it := range p.handlers {
+		next, err := p.Invoke(it)
 		if err != nil {
 			panic(err)
 		}
