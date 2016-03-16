@@ -17,6 +17,7 @@ type Context interface {
 	Ok()
 	NotFound()
 	Forbidden()
+	Msg(code int, msg string)
 }
 type context struct {
 	di.Container
@@ -60,6 +61,14 @@ func (p *context) Json(o interface{}) {
 	p.Result = &JsonResult{o}
 }
 
+func (p *context) Msg(code int, msg string) {
+	// code
+	// ok: 200
+	// err:400
+	p.Header("Jbreak", "Msg")
+	p.Json(RespMsg{code, msg})
+}
+
 func (p *context) Forbidden() {
 	p.Result = ResultForbidden
 }
@@ -74,4 +83,9 @@ func (p *context) exec() {
 			return
 		}
 	}
+}
+
+type RespMsg struct {
+	Code int
+	Msg  string
 }
