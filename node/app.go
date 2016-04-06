@@ -75,6 +75,7 @@ func (p *App) NewCtx(r *http.Request, rw http.ResponseWriter) *Ctx {
 	c.Map(resp)
 	c.Map(req)
 	c.SetParent(p)
+	c.urlParts = *newUrlParts(req.Url())
 	return c
 }
 func (p *App) handler(w http.ResponseWriter, r *http.Request) {

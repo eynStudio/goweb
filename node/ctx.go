@@ -18,6 +18,7 @@ type Ctx struct {
 	Scope  M
 	Err    *CtxErr
 	afters []Handler
+	urlParts
 }
 
 func (p *Ctx) Error(s int, d string) *Ctx {

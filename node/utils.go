@@ -35,3 +35,29 @@ func (p *Req) IsAcceptJson() bool {
 type Resp struct {
 	http.ResponseWriter
 }
+
+type urlPart struct {
+	path string
+}
+
+type urlParts struct {
+	curIdx int
+	parts  []*urlPart
+}
+
+func newUrlParts(path string) *urlParts {
+	m := &urlParts{}
+	m.parseParts(path)
+	return m
+}
+
+func (p *urlParts) parseParts(path string) {
+	parts := strings.Split(path, "/")[1:]
+	for _, it := range parts {
+		p.parts = append(p.parts, &urlPart{it})
+	}
+}
+func (p *urlParts) hasNextPart() bool  { return p.curIdx < len(p.parts) }
+func (p *urlParts) moveNextPart()      { p.curIdx += 1 }
+func (p *urlParts) CurPart() *urlPart  { return p.parts[p.curIdx] }
+func (p *urlParts) NextPart() *urlPart { return p.parts[p.curIdx+1] }

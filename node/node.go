@@ -41,9 +41,16 @@ func (p *Node) AddNode(n INode) *Node {
 func (p *Node) Router(c *Ctx) (found bool) {
 	p.RunInterceptors(c)
 
-	log.Println("Node.Router")
+	if c.hasNextPart() {
+		//check next
+	}
+
+	log.Println("Node.Router", c.CurPart())
 	return false
 }
+
+func (p *Node) isParamNote() bool { return '{' == p.Path[0] && '}' == p.Path[len(p.Path)-1] }
+func (p *Node) isRegexNode() bool { return '(' == p.Path[0] && ')' == p.Path[len(p.Path)-1] }
 
 func (p *Node) Interceptor(m *Interceptor) *Node {
 	p.Interceptors = append(p.Interceptors, m)
