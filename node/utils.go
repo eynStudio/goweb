@@ -52,12 +52,17 @@ func newUrlParts(path string) *urlParts {
 }
 
 func (p *urlParts) parseParts(path string) {
-	parts := strings.Split(path, "/")[1:]
+	parts := strings.Split(path, "/")
 	for _, it := range parts {
 		p.parts = append(p.parts, &urlPart{it})
 	}
 }
-func (p *urlParts) hasNextPart() bool  { return p.curIdx < len(p.parts) }
-func (p *urlParts) moveNextPart()      { p.curIdx += 1 }
-func (p *urlParts) CurPart() *urlPart  { return p.parts[p.curIdx] }
-func (p *urlParts) NextPart() *urlPart { return p.parts[p.curIdx+1] }
+func (p *urlParts) moveNextPart()     { p.curIdx += 1 }
+func (p *urlParts) hasNextPart() bool { return p.curIdx < len(p.parts)-1 }
+func (p *urlParts) CurPart() *urlPart { return p.parts[p.curIdx] }
+func (p *urlParts) NextPart() *urlPart {
+	if p.hasNextPart() {
+		return p.parts[p.curIdx+1]
+	}
+	return nil
+}

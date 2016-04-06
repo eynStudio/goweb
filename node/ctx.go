@@ -14,10 +14,10 @@ type Ctx struct {
 	di.Container
 	Req
 	*Resp
-	//	handlers []Handler
-	Scope  M
-	Err    *CtxErr
-	afters []Handler
+	Scope   M
+	Err     *CtxErr
+	afters  []Handler
+	handled bool
 	urlParts
 }
 

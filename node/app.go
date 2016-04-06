@@ -79,6 +79,8 @@ func (p *App) NewCtx(r *http.Request, rw http.ResponseWriter) *Ctx {
 	return c
 }
 func (p *App) handler(w http.ResponseWriter, r *http.Request) {
+	log.Println("App.handler", r.URL.Path)
+
 	ctx := p.NewCtx(r, w)
 	p.Root.Router(ctx)
 	//	ctx.exec()
@@ -89,5 +91,4 @@ func (p *App) handler(w http.ResponseWriter, r *http.Request) {
 	//	if w, ok := ctx.Resp.(io.Closer); ok {
 	//		w.Close()
 	//	}
-	log.Println("App.handler")
 }
