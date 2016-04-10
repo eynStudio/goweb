@@ -46,6 +46,7 @@ func (p *Node) Router(c *Ctx) {
 	if !c.handled {
 		log.Println("node: ", p.Path, " not handled")
 	}
+	log.Println(c.Scope)
 	//try handle here...
 }
 
@@ -68,9 +69,11 @@ func (p *Node) tryParseParam(c *Ctx) {
 }
 
 func (p *Node) CanRouter(test string) bool { return p.isParamNote() || p.Path == test }
-func (p *Node) isParamNote() bool          { return '{' == p.Path[0] && '}' == p.Path[len(p.Path)-1] }
-func (p *Node) getParamName() string       { return p.Path[1 : len(p.Path)-1] }
-func (p *Node) isRegexNode() bool          { return '(' == p.Path[0] && ')' == p.Path[len(p.Path)-1] }
+func (p *Node) isParamNote() bool {
+	return len(p.Path) > 0 && '{' == p.Path[0] && '}' == p.Path[len(p.Path)-1]
+}
+func (p *Node) getParamName() string { return p.Path[1 : len(p.Path)-1] }
+func (p *Node) isRegexNode() bool    { return '(' == p.Path[0] && ')' == p.Path[len(p.Path)-1] }
 
 func (p *Node) Interceptor(m *Interceptor) *Node {
 	p.Interceptors = append(p.Interceptors, m)
