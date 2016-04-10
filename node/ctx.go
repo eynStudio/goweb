@@ -17,7 +17,7 @@ type Ctx struct {
 	Scope   M
 	Err     *CtxErr
 	afters  []Handler
-	handled bool
+	Handled bool
 	urlParts
 }
 

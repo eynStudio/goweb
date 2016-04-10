@@ -37,28 +37,43 @@ func (p *Node) AddNode(n INode) INode {
 }
 
 func (p *Node) Router(c *Ctx) {
+	log.Printf("router: %#v", p)
 	p.RunInterceptors(c)
 	//	cur := c.CurPart()
 
 	p.tryParseParam(c)
 	p.RouteSubNodes(c)
 
-	if !c.handled {
+	if !c.Handled {
 		log.Println("node: ", p.Path, " not handled")
 	}
 	log.Println(c.Scope)
 	//try handle here...
+	p.Handler(c)
 }
 
+func (p *Node) Handler(c *Ctx) {
+	if c.Handled {
+		log.Println("node: at path:", p.Path, ",ctx had handled")
+	}
+	log.Println("node:"+p.Path, " handler here")
+}
 func (p *Node) RouteSubNodes(c *Ctx) {
 	if c.hasNextPart() {
 		for _, it := range p.Nodes {
+			log.Println("next node path ", c.NextPart().path, it)
 			if it.CanRouter(c.NextPart().path) {
+				log.Printf("can route %#v", it)
+				//				log.Println()
 				c.moveNextPart()
 				it.Router(c)
 				break
+			} else {
+				log.Printf("can not route %#v", it)
 			}
 		}
+	} else {
+		log.Println(p.Path, " no next path")
 	}
 }
 

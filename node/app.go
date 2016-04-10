@@ -26,7 +26,10 @@ func NewApp(name string) *App {
 	//	r := NewRouter()
 	//	di.Root.MapAs(r, (*Router)(nil))
 	c := LoadConfig(name)
-	app := &App{Root: NewNode(""), Container: di.Root, Name: name, Cfg: c}
+	return NewAppWithCfg(c)
+}
+func NewAppWithCfg(c *Config) *App {
+	app := &App{Root: NewNode(""), Container: di.Root, Name: "", Cfg: c}
 	app.Server = &http.Server{
 		Addr:         fmt.Sprintf(":%d", c.Port),
 		Handler:      http.HandlerFunc(app.handler),
