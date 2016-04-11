@@ -10,12 +10,10 @@ func main() {
 	log.Println("Hello Start...")
 	app := node.NewAppWithCfg(&node.Config{Port: 80})
 
-	home := &Home{node.NewNode("")}
+	home := NewHome()
 	app.Root.AddNode(home)
-	my := app.Root.NewNode("my")
-	n2 := node.NewParamNode("{id}")
-	my.AddNode(n2)
-	n2.NewNode("hi")
+	home.NewParamNode("id")
+	app.Root.AddNode(node.NewParamNode("id"))
 	app.Start()
 
 }

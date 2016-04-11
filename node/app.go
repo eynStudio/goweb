@@ -17,14 +17,10 @@ type App struct {
 	Name   string
 	Cfg    *Config
 	Server *http.Server
-	//	SetupHooks []func()
-	//	handlers   []Handler
-	//	Router
+	Router
 }
 
 func NewApp(name string) *App {
-	//	r := NewRouter()
-	//	di.Root.MapAs(r, (*Router)(nil))
 	c := LoadConfig(name)
 	return NewAppWithCfg(c)
 }
@@ -54,22 +50,6 @@ func (P *App) Start() {
 	}
 }
 
-//func (this *App) Use(h Handler) *App {
-//	checkHandler(h)
-//	this.handlers = append(this.handlers, h)
-//	return this
-//}
-
-//func (this *App) UseHook(f func()) *App {
-//	this.SetupHooks = append(this.SetupHooks, f)
-//	return this
-//}
-
-//func (this *App) runSetupHooks() {
-//	for _, hook := range this.SetupHooks {
-//		hook()
-//	}
-//}
 func (p *App) NewCtx(r *http.Request, rw http.ResponseWriter) *Ctx {
 	req := Req{r}
 	resp := &Resp{rw}
@@ -85,7 +65,10 @@ func (p *App) handler(w http.ResponseWriter, r *http.Request) {
 	log.Println("App.handler", r.URL.Path)
 
 	ctx := p.NewCtx(r, w)
-	p.Root.Router(ctx)
+	p.Route(p.Root, ctx)
+
+	log.Println(ctx.Scope)
+	//	p.Root.Route(p.Root, ctx)
 	//	ctx.exec()
 
 	//	if ctx.Result != nil {

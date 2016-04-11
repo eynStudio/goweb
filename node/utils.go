@@ -20,8 +20,8 @@ func (p *Req) Url() string {
 	return p.URL.Path
 }
 
-func (p *Req) Method() string {
-	return strings.ToLower(p.Request.Method)
+func (p *Req) JMethod() string {
+	return p.Header.Get("jBreak-Method")
 }
 
 func (p *Req) IsJsonContent() bool {
