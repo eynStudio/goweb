@@ -7,6 +7,7 @@ import (
 type INode interface {
 	AddNode(n INode) INode
 	NewParamNode(path string) INode
+	NewRegexNode(path, regex string) INode
 	CanRouter(test string) bool
 	Handler(c *Ctx)
 	RunInterceptors(c *Ctx) INode
@@ -29,6 +30,11 @@ func NewNode(path string) *Node {
 
 func (p *Node) NewParamNode(path string) INode {
 	n := NewParamNode(path)
+	p.Nodes = append(p.Nodes, n)
+	return n
+}
+func (p *Node) NewRegexNode(path, regex string) INode {
+	n := NewRegexNode(path, regex)
 	p.Nodes = append(p.Nodes, n)
 	return n
 }

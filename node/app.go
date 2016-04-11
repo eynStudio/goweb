@@ -3,6 +3,7 @@ package node
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -68,6 +69,7 @@ func (p *App) handler(w http.ResponseWriter, r *http.Request) {
 	ctx := p.NewCtx(r, w)
 	if !ctx.ServeFile(p.Cfg) {
 		p.Route(p.Root, ctx)
+		log.Println(ctx.Scope)
 		if !ctx.Handled {
 			ctx.NotFound()
 		}
