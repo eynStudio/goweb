@@ -3,12 +3,11 @@ package node
 import (
 	"fmt"
 	"io"
-	"log"
-	//	"io"
 	"net/http"
 	"time"
 
 	. "github.com/eynstudio/gobreak"
+	"github.com/eynstudio/gobreak/conf"
 	"github.com/eynstudio/gobreak/di"
 )
 
@@ -22,9 +21,11 @@ type App struct {
 }
 
 func NewApp(name string) *App {
-	c := LoadConfig(name)
-	return NewAppWithCfg(c)
+	var cfg Config
+	conf.MustLoadJsonCfg(&cfg, "conf/"+name+".json")
+	return NewAppWithCfg(&cfg)
 }
+
 func NewAppWithCfg(c *Config) *App {
 	app := &App{Root: NewNode(""), Container: di.Root, Name: "", Cfg: c}
 	app.Server = &http.Server{
@@ -62,16 +63,14 @@ func (p *App) NewCtx(r *http.Request, rw http.ResponseWriter) *Ctx {
 	c.urlParts = *newUrlParts(req.Url())
 	return c
 }
+
 func (p *App) handler(w http.ResponseWriter, r *http.Request) {
-	log.Println("App.handler", r.URL.Path)
-
 	ctx := p.NewCtx(r, w)
-	p.Route(p.Root, ctx)
-
-	log.Println(ctx.Scope)
-
-	if !ctx.Handled {
-		ctx.NotFound()
+	if !ctx.ServeFile(p.Cfg) {
+		p.Route(p.Root, ctx)
+		if !ctx.Handled {
+			ctx.NotFound()
+		}
 	}
 
 	if w, ok := ctx.Resp.ResponseWriter.(io.Closer); ok {

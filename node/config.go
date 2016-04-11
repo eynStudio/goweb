@@ -1,9 +1,6 @@
 package node
 
-import (
-	"encoding/json"
-	"io/ioutil"
-)
+import ()
 
 type Config struct {
 	Port       int
@@ -11,17 +8,4 @@ type Config struct {
 	CertFile   string
 	KeyFile    string
 	ServeFiles []string
-}
-
-func LoadConfig(file string) (cfg *Config) {
-	content, err := ioutil.ReadFile("conf/" + file + ".json")
-	if err != nil {
-		panic(err)
-	}
-
-	if err = json.Unmarshal(content, &cfg); err != nil {
-		panic(err)
-	}
-
-	return
 }
