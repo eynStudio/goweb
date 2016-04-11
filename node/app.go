@@ -2,6 +2,7 @@ package node
 
 import (
 	"fmt"
+	"io"
 	"log"
 	//	"io"
 	"net/http"
@@ -68,13 +69,12 @@ func (p *App) handler(w http.ResponseWriter, r *http.Request) {
 	p.Route(p.Root, ctx)
 
 	log.Println(ctx.Scope)
-	//	p.Root.Route(p.Root, ctx)
-	//	ctx.exec()
 
-	//	if ctx.Result != nil {
-	//		ctx.Result.Apply(ctx)
-	//	}
-	//	if w, ok := ctx.Resp.(io.Closer); ok {
-	//		w.Close()
-	//	}
+	if !ctx.Handled {
+		ctx.NotFound()
+	}
+
+	if w, ok := ctx.Resp.ResponseWriter.(io.Closer); ok {
+		w.Close()
+	}
 }

@@ -8,6 +8,9 @@ type Router struct {
 }
 
 func (p *Router) Route(n INode, c *Ctx) {
+	if c.IsErr() {
+		return
+	}
 	n.RunInterceptors(c)
 	p.RouteSubNodes(n, c)
 

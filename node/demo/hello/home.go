@@ -1,8 +1,7 @@
 package main
 
 import (
-	"log"
-
+	. "github.com/eynstudio/gobreak"
 	"github.com/eynstudio/goweb/node"
 )
 
@@ -28,5 +27,5 @@ func (p *Home) Handler(c *node.Ctx) {
 }
 
 func (p *Home) Get(c *node.Ctx) {
-	log.Println("Get...")
+	c.Json(M{"haah": "aa"})
 }
