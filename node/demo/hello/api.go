@@ -27,5 +27,5 @@ func (p *Api) Handler(c *node.Ctx) {
 }
 
 func (p *Api) Get(c *node.Ctx) {
-	c.Json(M{"haah": "aa"})
+	c.Json(M{"haah": "aaffd"})
 }

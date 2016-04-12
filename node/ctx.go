@@ -55,8 +55,8 @@ func (p *Ctx) ServeFile(cfg *Config) bool {
 			} else {
 				http.ServeFile(p.Resp, p.Request, url[1:])
 			}
-			return false
+			return true
 		}
 	}
-	return true
+	return false
 }
