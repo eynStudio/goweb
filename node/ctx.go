@@ -12,14 +12,13 @@ import (
 
 type Ctx struct {
 	di.Container
-	Req
+	*Req
 	*Resp
 	Scope   M
 	isErr   bool
 	afters  []Handler
 	Handled bool
-	urlParts
-	tmpl *Tmpl
+	tmpl    *Tmpl
 }
 
 func (p *Ctx) Error(code int) *Ctx {

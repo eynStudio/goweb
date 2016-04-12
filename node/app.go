@@ -65,14 +65,13 @@ func (P *App) Start() {
 }
 
 func (p *App) NewCtx(r *http.Request, rw http.ResponseWriter) *Ctx {
-	req := Req{r}
+	req := NewReq(r)
 	resp := &Resp{rw}
 	c := &Ctx{Container: di.New(), Req: req, Resp: resp, Scope: M{}, tmpl: p.Tmpl}
 	c.Map(c) //需要吗？
 	c.Map(resp)
 	c.Map(req)
 	c.SetParent(p)
-	c.urlParts = *newUrlParts(req.Url())
 	return c
 }
 
