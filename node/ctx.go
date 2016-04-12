@@ -11,6 +11,7 @@ import (
 )
 
 type Ctx struct {
+	*App
 	di.Container
 	*Req
 	*Resp
@@ -18,7 +19,6 @@ type Ctx struct {
 	isErr   bool
 	afters  []Handler
 	Handled bool
-	tmpl    *Tmpl
 }
 
 func (p *Ctx) Error(code int) *Ctx {
@@ -49,15 +49,15 @@ func (p *Ctx) Json(m T) {
 
 func (p *Ctx) Tmpl(tpl string, o T) {
 	p.Resp.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := p.tmpl.Execute(p.Resp, tpl, o); err != nil {
+	if err := p.App.Tmpl.Execute(p.Resp, tpl, o); err != nil {
 		log.Println(err)
 		p.Error(http.StatusInternalServerError)
 	}
 }
 
-func (p *Ctx) ServeFile(cfg *Cfg) bool {
+func (p *Ctx) ServeFile() bool {
 	url := p.Url()
-	for _, path := range cfg.ServeFiles {
+	for _, path := range p.Cfg.ServeFiles {
 		if strings.HasPrefix(url, path) {
 			if fi, err := os.Stat(url[1:]); err != nil || fi.IsDir() {
 				p.NotFound()

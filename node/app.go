@@ -19,6 +19,7 @@ type App struct {
 	Server *http.Server
 	*Router
 	*Tmpl
+	*Sessions
 }
 
 func NewApp(name string) *App {
@@ -35,6 +36,7 @@ func NewAppWithCfg(c *Cfg) *App {
 		Cfg:       c,
 		Router:    &Router{},
 		Tmpl:      &Tmpl{},
+		Sessions:  &Sessions{},
 	}
 
 	if c.useTmpl {
@@ -67,7 +69,7 @@ func (P *App) Start() {
 func (p *App) NewCtx(r *http.Request, rw http.ResponseWriter) *Ctx {
 	req := NewReq(r)
 	resp := &Resp{rw}
-	c := &Ctx{Container: di.New(), Req: req, Resp: resp, Scope: M{}, tmpl: p.Tmpl}
+	c := &Ctx{App: p, Container: di.New(), Req: req, Resp: resp, Scope: M{}}
 	c.Map(c) //需要吗？
 	c.Map(resp)
 	c.Map(req)
@@ -77,7 +79,7 @@ func (p *App) NewCtx(r *http.Request, rw http.ResponseWriter) *Ctx {
 
 func (p *App) handler(w http.ResponseWriter, r *http.Request) {
 	ctx := p.NewCtx(r, w)
-	if !ctx.ServeFile(p.Cfg) {
+	if !ctx.ServeFile() {
 		p.Route(p.Root, ctx)
 		if !ctx.Handled {
 			ctx.NotFound()
