@@ -11,8 +11,8 @@ type Home struct {
 }
 
 func NewHome() *Home {
-	h := &Home{node.NewNode("")}
-	h.NewParamNode("id")
+	h := &Home{node.NewNode("", false)}
+	h.NewParamNode("id", false)
 	return h
 }
 

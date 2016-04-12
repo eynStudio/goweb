@@ -1,40 +1,39 @@
 package node
 
-import (
-//	"log"
-)
-
 type INode interface {
 	AddNode(n INode) INode
-	NewParamNode(path string) INode
-	NewRegexNode(path, regex string) INode
+	NewParamNode(path string, auth bool) INode
+	NewRegexNode(path, regex string, auth bool) INode
 	CanRouter(test string) bool
 	Handler(c *Ctx)
 	RunInterceptors(c *Ctx) INode
 	GetNodes() []INode
+	NeedAuth() bool
 }
 
 type Node struct {
 	Path         string
 	Interceptors []*Interceptor
 	Nodes        []INode
+	needAuth     bool
 }
 
-func NewNode(path string) *Node {
+func NewNode(path string, auth bool) *Node {
 	return &Node{
 		Path:         path,
 		Interceptors: []*Interceptor{},
 		Nodes:        []INode{},
+		needAuth:     auth,
 	}
 }
 
-func (p *Node) NewParamNode(path string) INode {
-	n := NewParamNode(path)
+func (p *Node) NewParamNode(path string, auth bool) INode {
+	n := NewParamNode(path, auth)
 	p.Nodes = append(p.Nodes, n)
 	return n
 }
-func (p *Node) NewRegexNode(path, regex string) INode {
-	n := NewRegexNode(path, regex)
+func (p *Node) NewRegexNode(path, regex string, auth bool) INode {
+	n := NewRegexNode(path, regex, auth)
 	p.Nodes = append(p.Nodes, n)
 	return n
 }
@@ -45,8 +44,9 @@ func (p *Node) AddNode(n INode) INode {
 }
 
 func (p *Node) Handler(c *Ctx)             {}
-func (p *Node) CanRouter(test string) bool { return p.Path == test }
 func (p *Node) GetNodes() []INode          { return p.Nodes }
+func (p *Node) NeedAuth() bool             { return p.needAuth }
+func (p *Node) CanRouter(test string) bool { return p.Path == test }
 
 func (p *Node) Interceptor(m *Interceptor) *Node {
 	p.Interceptors = append(p.Interceptors, m)

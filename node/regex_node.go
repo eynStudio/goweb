@@ -9,7 +9,9 @@ type RegexNode struct {
 	regex string
 }
 
-func NewRegexNode(path, regex string) *RegexNode { return &RegexNode{Node: NewNode(path), regex: regex} }
+func NewRegexNode(path, regex string, auth bool) *RegexNode {
+	return &RegexNode{Node: NewNode(path, auth), regex: regex}
+}
 
 func (p *RegexNode) CanRouter(test string) bool {
 	match, _ := regexp.MatchString(p.regex, test)

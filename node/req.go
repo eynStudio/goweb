@@ -11,21 +11,26 @@ import (
 type Req struct {
 	*http.Request
 	*urlParts
+	UserId string
 }
 
 func NewReq(r *http.Request) *Req {
 	rr := &Req{Request: r}
+	rr.parseUserId()
 	rr.urlParts = newUrlParts(rr.Url())
 	return rr
 }
 
-func (p *Req) Url() string {
-	return p.URL.Path
+func (p *Req) parseUserId() {
+	jbreak := p.Header.Get("Authorization")
+	if jbreak != "" {
+		p.UserId = strings.Split(jbreak, " ")[1]
+	}
 }
 
-func (p *Req) JMethod() string {
-	return p.Header.Get("jBreak-Method")
-}
+func (p *Req) Url() string     { return p.URL.Path }
+func (p *Req) hasUserId() bool { return len(p.UserId) > 0 }
+func (p *Req) JMethod() string { return p.Header.Get("jBreak-Method") }
 
 func (p *Req) JsonBody(m T) bool {
 	if p.IsJsonContent() && p.Body != nil {
@@ -40,10 +45,7 @@ func (p *Req) JsonBody(m T) bool {
 func (p *Req) IsJsonContent() bool {
 	return strings.Contains(p.Header.Get("Content-Type"), "application/json")
 }
-
-func (p *Req) IsAcceptJson() bool {
-	return strings.Contains(p.Header.Get("Accept"), "application/json")
-}
+func (p *Req) IsAcceptJson() bool { return strings.Contains(p.Header.Get("Accept"), "application/json") }
 
 type urlPart struct {
 	path string

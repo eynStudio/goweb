@@ -29,7 +29,7 @@ func NewApp(name string) *App {
 
 func NewAppWithCfg(c *Cfg) *App {
 	app := &App{
-		Root:      NewNode(""),
+		Root:      NewNode("", false),
 		Container: di.Root,
 		Name:      "",
 		Cfg:       c,

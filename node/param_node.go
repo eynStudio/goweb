@@ -4,7 +4,7 @@ type ParamNode struct {
 	*Node
 }
 
-func NewParamNode(path string) *ParamNode { return &ParamNode{NewNode(path)} }
+func NewParamNode(path string, auth bool) *ParamNode { return &ParamNode{NewNode(path, auth)} }
 
 func (p *ParamNode) CanRouter(test string) bool { return true }
 

@@ -10,8 +10,8 @@ type Api struct {
 }
 
 func NewApi() *Api {
-	h := &Api{node.NewNode("api")}
-	h.NewParamNode("id")
+	h := &Api{node.NewNode("api", false)}
+	h.NewParamNode("id", false)
 	return h
 }
 
