@@ -1,24 +1,18 @@
 package node
 
-//import (
-//	"html/template"
-//	"io"
-//)
+import (
+	"html/template"
+	"io"
+)
 
-//var MyTemplates Template
+type Tmpl struct {
+	Templates *template.Template
+}
 
-//func init() {
-//	MyTemplates.Load()
-//}
+func (p *Tmpl) Load() {
+	p.Templates = template.Must(template.New("").Delims("[[", "]]").ParseGlob("views/*.*"))
+}
 
-//type Template struct {
-//	Templates *template.Template
-//}
-
-//func (this *Template) Load() {
-//	this.Templates = template.Must(template.New("").Delims("[[", "]]").ParseGlob("views/*.*"))
-//}
-
-//func (this *Template) Execute(wr io.Writer, name string, data interface{}) error {
-//	return this.Templates.ExecuteTemplate(wr, name+".tpl", data)
-//}
+func (p *Tmpl) Execute(wr io.Writer, name string, data interface{}) error {
+	return p.Templates.ExecuteTemplate(wr, name+".tpl", data)
+}

@@ -3,7 +3,6 @@ package node
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"time"
 
@@ -15,20 +14,32 @@ import (
 type App struct {
 	Root INode
 	di.Container
-	Name   string
-	Cfg    *Config
+	Name string
+	*Cfg
 	Server *http.Server
-	Router
+	*Router
+	*Tmpl
 }
 
 func NewApp(name string) *App {
-	var cfg Config
+	var cfg Cfg
 	conf.MustLoadJsonCfg(&cfg, "conf/"+name+".json")
 	return NewAppWithCfg(&cfg)
 }
 
-func NewAppWithCfg(c *Config) *App {
-	app := &App{Root: NewNode(""), Container: di.Root, Name: "", Cfg: c}
+func NewAppWithCfg(c *Cfg) *App {
+	app := &App{
+		Root:      NewNode(""),
+		Container: di.Root,
+		Name:      "",
+		Cfg:       c,
+		Router:    &Router{},
+		Tmpl:      &Tmpl{},
+	}
+
+	if c.useTmpl {
+		app.Tmpl.Load()
+	}
 	app.Server = &http.Server{
 		Addr:         fmt.Sprintf(":%d", c.Port),
 		Handler:      http.HandlerFunc(app.handler),
@@ -56,7 +67,7 @@ func (P *App) Start() {
 func (p *App) NewCtx(r *http.Request, rw http.ResponseWriter) *Ctx {
 	req := Req{r}
 	resp := &Resp{rw}
-	c := &Ctx{Container: di.New(), Req: req, Resp: resp, Scope: M{}}
+	c := &Ctx{Container: di.New(), Req: req, Resp: resp, Scope: M{}, tmpl: p.Tmpl}
 	c.Map(c) //需要吗？
 	c.Map(resp)
 	c.Map(req)
@@ -69,7 +80,6 @@ func (p *App) handler(w http.ResponseWriter, r *http.Request) {
 	ctx := p.NewCtx(r, w)
 	if !ctx.ServeFile(p.Cfg) {
 		p.Route(p.Root, ctx)
-		log.Println(ctx.Scope)
 		if !ctx.Handled {
 			ctx.NotFound()
 		}

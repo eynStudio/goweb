@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	. "github.com/eynstudio/gobreak"
 	"github.com/eynstudio/gobreak/di"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -18,6 +19,7 @@ type Ctx struct {
 	afters  []Handler
 	Handled bool
 	urlParts
+	tmpl *Tmpl
 }
 
 func (p *Ctx) Error(code int) *Ctx {
@@ -46,7 +48,15 @@ func (p *Ctx) Json(m T) {
 	}
 }
 
-func (p *Ctx) ServeFile(cfg *Config) bool {
+func (p *Ctx) Tmpl(tpl string, o T) {
+	p.Resp.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := p.tmpl.Execute(p.Resp, tpl, o); err != nil {
+		log.Println(err)
+		p.Error(http.StatusInternalServerError)
+	}
+}
+
+func (p *Ctx) ServeFile(cfg *Cfg) bool {
 	url := p.Url()
 	for _, path := range cfg.ServeFiles {
 		if strings.HasPrefix(url, path) {
